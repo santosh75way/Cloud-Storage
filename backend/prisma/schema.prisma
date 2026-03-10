@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password  String
+  fullName  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  lastLogin DateTime?
+  role      Role      @default(USER)
+
+  // Existing relations
+  resetTokens PasswordResetToken[]
+
+  // New relations
+  ownedNodes     Node[]            @relation("NodeOwner")
+  sharesReceived Share[]           @relation("ShareRecipient")
+  sharesCreated  Share[]           @relation("ShareCreator")
+  publicLinks    PublicShareLink[] @relation("PublicShareCreator")
+
+  @@index([email])
+  @@map("users")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("passwords")
+}
+
+model Node {
+  id                     String    @id @default(cuid())
+  name                   String
+  type                   NodeType
+  parentId               String?
+  ownerId                String
+  mimeType               String?
+  size                   Int?
+  extension              String?
+  cloudinaryPublicId     String?
+  cloudinaryResourceType String?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  deletedAt              DateTime?
+
+  // Relations
+  parent      Node?             @relation("NodeHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Node[]            @relation("NodeHierarchy")
+  owner       User              @relation("NodeOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  shares      Share[]
+  publicLinks PublicShareLink[]
+
+  @@unique([parentId, name])
+  @@index([parentId])
+  @@index([ownerId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("nodes")
+}
+
+enum NodeType {
+  FILE
+  FOLDER
+}
+
+model Share {
+  id               String          @id @default(cuid())
+  nodeId           String
+  sharedByUserId   String
+  sharedWithUserId String
+  permission       SharePermission
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  // Relations
+  node           Node @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  sharedByUser   User @relation("ShareCreator", fields: [sharedByUserId], references: [id], onDelete: Cascade)
+  sharedWithUser User @relation("ShareRecipient", fields: [sharedWithUserId], references: [id], onDelete: Cascade)
+
+  @@unique([nodeId, sharedWithUserId])
+  @@index([nodeId])
+  @@index([sharedByUserId])
+  @@index([sharedWithUserId])
+  @@map("shares")
+}
+
+enum SharePermission {
+  VIEW
+  EDIT
+}
+
+model PublicShareLink {
+  id              String    @id @default(cuid())
+  nodeId          String
+  token           String    @unique
+  createdByUserId String
+  isActive        Boolean   @default(true)
+  expiresAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  node          Node @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  createdByUser User @relation("PublicShareCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+
+  @@index([nodeId])
+  @@index([token])
+  @@index([createdByUserId])
+  @@index([isActive])
+  @@map("public_shares")
+}
