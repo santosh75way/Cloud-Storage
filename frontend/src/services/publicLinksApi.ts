@@ -58,15 +58,21 @@ export const publicLinksApi = createApi({
             invalidatesTags: (_result, _error, arg) => [{ type: "PublicLink", id: arg.nodeId }],
         }),
 
-        getPublicLinksForNode: builder.query<ApiSuccessResponse<PublicShareLink[]>, string>({
-            query: (nodeId) => ({ url: `public-links/node/${nodeId}` }),
+        getPublicLinksForNode: builder.query<
+            ApiSuccessResponse<{ items: PublicShareLink[]; totalPages: number; total: number; page: number }>,
+            { nodeId: string; page: number; limit: number }
+        >({
+            query: ({ nodeId, page, limit }) => ({
+                url: `public-links/node/${nodeId}`,
+                params: { page, limit },
+            }),
             providesTags: (result, _error, arg) =>
-                result?.data
+                result?.data?.items
                     ? [
-                        ...result.data.map(({ id }) => ({ type: "PublicLink" as const, id })),
-                        { type: "PublicLink", id: arg },
+                        ...result.data.items.map(({ id }) => ({ type: "PublicLink" as const, id })),
+                        { type: "PublicLink", id: arg.nodeId },
                     ]
-                    : [{ type: "PublicLink", id: arg }],
+                    : [{ type: "PublicLink", id: arg.nodeId }],
         }),
 
         revokePublicLink: builder.mutation<ApiSuccessResponse<PublicShareLink>, string>({

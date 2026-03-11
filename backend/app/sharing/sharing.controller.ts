@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { sharingService } from ".";
-import { createShareSchema, updateShareSchema } from "./sharing.schemas";
+import { createShareSchema, updateShareSchema, listSharingQuerySchema } from "./sharing.schemas";
 
 type AuthenticatedRequestUser = {
   userId: string;
@@ -43,13 +43,16 @@ export class SharingController {
     try {
       const authenticatedReq = req as AuthenticatedRequest;
       const nodeId = req.params.nodeId;
+      const parsedQuery = listSharingQuerySchema.parse(req.query);
 
       const shares = await sharingService.listSharesForNode(
         {
           userId: authenticatedReq.user.userId,
           role: authenticatedReq.user.role,
         },
-        nodeId
+        nodeId,
+        parsedQuery.page,
+        parsedQuery.limit
       );
 
       return res.status(200).json({
@@ -65,11 +68,16 @@ export class SharingController {
   public async getSharedWithMe(req: Request, res: Response, next: NextFunction) {
     try {
       const authenticatedReq = req as AuthenticatedRequest;
+      const parsedQuery = listSharingQuerySchema.parse(req.query);
 
-      const sharedItems = await sharingService.getSharedWithMe({
-        userId: authenticatedReq.user.userId,
-        role: authenticatedReq.user.role,
-      });
+      const sharedItems = await sharingService.getSharedWithMe(
+        {
+          userId: authenticatedReq.user.userId,
+          role: authenticatedReq.user.role,
+        },
+        parsedQuery.page,
+        parsedQuery.limit
+      );
 
       return res.status(200).json({
         success: true,

@@ -44,13 +44,17 @@ export class PublicLinksController {
         try {
             const authenticatedReq = req as AuthenticatedRequest;
             const nodeId = req.params.nodeId;
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 20;
 
             const links = await publicLinksService.listPublicLinksForNode(
                 {
                     userId: authenticatedReq.user.userId,
                     role: authenticatedReq.user.role,
                 },
-                nodeId
+                nodeId,
+                page,
+                limit
             );
 
             return res.status(200).json({

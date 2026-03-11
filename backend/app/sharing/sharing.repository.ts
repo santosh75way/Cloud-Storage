@@ -138,7 +138,7 @@ export class SharingRepository {
         });
     }
 
-    public async findSharesByNodeId(nodeId: string) {
+    public async findSharesByNodeId(nodeId: string, skip: number, take: number) {
         return this.prisma.share.findMany({
             where: {
                 nodeId,
@@ -148,6 +148,8 @@ export class SharingRepository {
                     createdAt: "desc",
                 },
             ],
+            skip,
+            take,
             include: {
                 sharedWithUser: {
                     select: {
@@ -160,7 +162,15 @@ export class SharingRepository {
         });
     }
 
-    public async findNodesSharedWithUser(sharedWithUserId: string) {
+    public async countSharesByNodeId(nodeId: string) {
+        return this.prisma.share.count({
+            where: {
+                nodeId,
+            },
+        });
+    }
+
+    public async findNodesSharedWithUser(sharedWithUserId: string, skip: number, take: number) {
         return this.prisma.share.findMany({
             where: {
                 sharedWithUserId,
@@ -173,6 +183,8 @@ export class SharingRepository {
                     createdAt: "desc",
                 },
             ],
+            skip,
+            take,
             include: {
                 node: {
                     select: {
@@ -194,6 +206,17 @@ export class SharingRepository {
                         email: true,
                         fullName: true,
                     },
+                },
+            },
+        });
+    }
+
+    public async countNodesSharedWithUser(sharedWithUserId: string) {
+        return this.prisma.share.count({
+            where: {
+                sharedWithUserId,
+                node: {
+                    deletedAt: null,
                 },
             },
         });

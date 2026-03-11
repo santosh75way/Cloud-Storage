@@ -2,12 +2,33 @@ import { Alert, Box, CircularProgress, Container, Typography, Stack } from "@mui
 import { PeopleAltOutlined } from "@mui/icons-material";
 import { useGetSharedWithMeQuery } from "../services/sharingApi";
 import { SharedItemsList } from "../components/sharing/SharedItemsList";
+import { DrivePagination } from "../components/storage/DrivePagination";
+import { useState } from "react";
 
 export default function SharedWithMePage() {
-    const { data, isLoading, error } = useGetSharedWithMeQuery();
+    const [page, setPage] = useState(1);
+    const limit = 6;
+
+    const { data, isLoading, error } = useGetSharedWithMeQuery({ page, limit });
+
+    const items = data?.data?.items ?? [];
+    const totalPages = data?.data?.totalPages ?? 1;
+    const total = data?.data?.total ?? 0;
 
     return (
-        <Container maxWidth="lg" sx={{ py: 4, animation: "fadeInUp 0.5s ease-out" }}>
+        <Container
+            maxWidth="lg"
+            sx={{
+                py: 4,
+                animation: "fadeInUp 0.5s ease-out",
+                height: "100%",
+                overflowY: "auto",
+                overflowX: "hidden",
+                "&::-webkit-scrollbar": { display: "none" },
+                scrollbarWidth: "none",
+                msOverflowStyle: "none"
+            }}
+        >
             <Stack spacing={0.5} sx={{ mb: 4 }}>
                 <Box display="flex" alignItems="center" gap={1.5}>
                     <Box
@@ -47,8 +68,19 @@ export default function SharedWithMePage() {
                     Failed to load shared items.
                 </Alert>
             ) : (
-                <Box>
-                    <SharedItemsList items={data?.data ?? []} />
+                <Box display="flex" flexDirection="column" gap={0.5}>
+                    <SharedItemsList items={items} />
+
+                    {totalPages > 1 && (
+                        <Box sx={{ flexShrink: 0, mt: 1 }}>
+                            <DrivePagination
+                                page={page}
+                                totalPages={totalPages}
+                                total={total}
+                                onChange={setPage}
+                            />
+                        </Box>
+                    )}
                 </Box>
             )}
         </Container>

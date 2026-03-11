@@ -57,12 +57,16 @@ export const sharingApi = createApi({
             invalidatesTags: (_result, _error, arg) => [{ type: "Share", id: arg.nodeId }],
         }),
 
-        getSharesForNode: builder.query<ApiSuccessResponse<ShareRecord[]>, string>({
-            query: (nodeId) => ({
+        getSharesForNode: builder.query<
+            ApiSuccessResponse<{ items: ShareRecord[]; totalPages: number; total: number; page: number }>,
+            { nodeId: string; page: number; limit: number }
+        >({
+            query: ({ nodeId, page, limit }) => ({
                 url: `/shares/node/${nodeId}`,
                 method: "GET",
+                params: { page, limit },
             }),
-            providesTags: (_result, _error, nodeId) => [{ type: "Share", id: nodeId }],
+            providesTags: (_result, _error, arg) => [{ type: "Share", id: arg.nodeId }],
         }),
 
         updateShare: builder.mutation<ApiSuccessResponse<ShareRecord>, { shareId: string; body: UpdateSharePayload; nodeId: string }>({
@@ -82,10 +86,14 @@ export const sharingApi = createApi({
             invalidatesTags: (_result, _error, arg) => [{ type: "Share", id: arg.nodeId }],
         }),
 
-        getSharedWithMe: builder.query<ApiSuccessResponse<SharedWithMeItem[]>, void>({
-            query: () => ({
+        getSharedWithMe: builder.query<
+            ApiSuccessResponse<{ items: SharedWithMeItem[]; totalPages: number; total: number; page: number }>,
+            { page: number; limit: number }
+        >({
+            query: ({ page, limit }) => ({
                 url: `/shares/shared-with-me`,
                 method: "GET",
+                params: { page, limit },
             }),
             providesTags: ["Share"],
         }),

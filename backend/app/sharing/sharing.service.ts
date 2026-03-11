@@ -62,7 +62,7 @@ export class SharingService {
         return share;
     }
 
-    public async listSharesForNode(actor: ShareMutationActor, nodeId: string) {
+    public async listSharesForNode(actor: ShareMutationActor, nodeId: string, page: number = 1, limit: number = 20) {
         this.assertAdmin(actor);
 
         const node = await this.sharingRepository.findNodeById(nodeId);
@@ -71,7 +71,20 @@ export class SharingService {
             throw new AppError("Node not found", 404, "NODE_NOT_FOUND");
         }
 
-        return this.sharingRepository.findSharesByNodeId(nodeId);
+        const skip = (page - 1) * limit;
+
+        const [items, total] = await Promise.all([
+            this.sharingRepository.findSharesByNodeId(nodeId, skip, limit),
+            this.sharingRepository.countSharesByNodeId(nodeId)
+        ]);
+
+        return {
+            items,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit) || 1,
+        };
     }
 
     public async updateShare(actor: ShareMutationActor, shareId: string, payload: UpdateShareDto) {
@@ -105,10 +118,15 @@ export class SharingService {
         return deletedShare;
     }
 
-    public async getSharedWithMe(actor: ShareMutationActor) {
-        const sharedItems = await this.sharingRepository.findNodesSharedWithUser(actor.userId);
+    public async getSharedWithMe(actor: ShareMutationActor, page: number = 1, limit: number = 5) {
+        const skip = (page - 1) * limit;
 
-        return sharedItems.map((item: Awaited<ReturnType<SharingRepository["findNodesSharedWithUser"]>>[number]) => ({
+        const [sharedItems, total] = await Promise.all([
+            this.sharingRepository.findNodesSharedWithUser(actor.userId, skip, limit),
+            this.sharingRepository.countNodesSharedWithUser(actor.userId)
+        ]);
+
+        const items = sharedItems.map((item: Awaited<ReturnType<SharingRepository["findNodesSharedWithUser"]>>[number]) => ({
             shareId: item.id,
             permission: item.permission,
             nodeId: item.node.id,
@@ -120,5 +138,13 @@ export class SharingService {
             size: item.node.size,
             extension: item.node.extension,
         }));
+
+        return {
+            items,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit) || 1,
+        };
     }
 }

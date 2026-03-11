@@ -21,10 +21,18 @@ export class PublicLinksRepository {
         return prisma.publicShareLink.findUnique({ where: { token } });
     }
 
-    async findPublicLinksByNodeId(nodeId: string): Promise<PublicShareLink[]> {
+    async findPublicLinksByNodeId(nodeId: string, skip: number, take: number): Promise<PublicShareLink[]> {
         return prisma.publicShareLink.findMany({
             where: { nodeId },
-            orderBy: { createdAt: "desc" }
+            orderBy: { createdAt: "desc" },
+            skip,
+            take,
+        });
+    }
+
+    async countPublicLinksByNodeId(nodeId: string): Promise<number> {
+        return prisma.publicShareLink.count({
+            where: { nodeId },
         });
     }
 

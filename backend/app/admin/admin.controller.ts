@@ -13,7 +13,7 @@ export class AdminController {
                 throw new AppError("Forbidden", 403, "FORBIDDEN");
             }
             const page = parseInt(req.query.page as string, 10) || 1;
-            const limit = parseInt(req.query.limit as string, 10) || 5;
+            const limit = parseInt(req.query.limit as string, 10) || 3;
             const result = await adminService.getRecentShares(page, limit);
             return res.json({ success: true, data: result });
         } catch (error) {
@@ -28,7 +28,7 @@ export class AdminController {
                 throw new AppError("Forbidden", 403, "FORBIDDEN");
             }
             const page = parseInt(req.query.page as string, 10) || 1;
-            const limit = parseInt(req.query.limit as string, 10) || 10;
+            const limit = parseInt(req.query.limit as string, 10) || 4;
             const result = await adminService.getActivityFeed(page, limit);
             return res.json({ success: true, data: result });
         } catch (error) {

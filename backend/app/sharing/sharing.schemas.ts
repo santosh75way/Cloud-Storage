@@ -12,5 +12,10 @@ export const updateShareSchema = z.object({
   permission: sharePermissionSchema,
 });
 
+export const listSharingQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+
 export type CreateShareSchemaInput = z.infer<typeof createShareSchema>;
 export type UpdateShareSchemaInput = z.infer<typeof updateShareSchema>;

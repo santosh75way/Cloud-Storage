@@ -41,8 +41,10 @@ export class PublicLinksService {
 
     public async listPublicLinksForNode(
         actor: AuthenticatedActor,
-        nodeId: string
-    ): Promise<PublicLinkResponseDto[]> {
+        nodeId: string,
+        page: number = 1,
+        limit: number = 20
+    ) {
         if (actor.role !== "ADMIN") {
             throw new AppError("Only administrators can list public share links", 403, "FORBIDDEN");
         }
@@ -52,8 +54,20 @@ export class PublicLinksService {
             throw new AppError("Node not found", 404, "NODE_NOT_FOUND");
         }
 
-        const links = await this.repository.findPublicLinksByNodeId(nodeId);
-        return links as PublicLinkResponseDto[];
+        const skip = (page - 1) * limit;
+
+        const [items, total] = await Promise.all([
+            this.repository.findPublicLinksByNodeId(nodeId, skip, limit),
+            this.repository.countPublicLinksByNodeId(nodeId)
+        ]);
+
+        return {
+            items,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit) || 1,
+        };
     }
 
     public async revokePublicLink(
