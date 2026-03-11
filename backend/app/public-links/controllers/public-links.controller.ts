@@ -3,7 +3,7 @@ import { PublicLinksService } from "../services/public-links.service";
 import { createPublicLinkSchema } from "../schemas/public-links.schemas";
 
 type AuthenticatedRequestUser = {
-    id: string;
+    userId: string;
     role: "ADMIN" | "USER";
 };
 
@@ -24,7 +24,7 @@ export class PublicLinksController {
 
             const link = await publicLinksService.createPublicLink(
                 {
-                    userId: authenticatedReq.user.id,
+                    userId: authenticatedReq.user.userId,
                     role: authenticatedReq.user.role,
                 },
                 parsedBody.body
@@ -47,7 +47,7 @@ export class PublicLinksController {
 
             const links = await publicLinksService.listPublicLinksForNode(
                 {
-                    userId: authenticatedReq.user.id,
+                    userId: authenticatedReq.user.userId,
                     role: authenticatedReq.user.role,
                 },
                 nodeId
@@ -70,7 +70,7 @@ export class PublicLinksController {
 
             const updatedLink = await publicLinksService.revokePublicLink(
                 {
-                    userId: authenticatedReq.user.id,
+                    userId: authenticatedReq.user.userId,
                     role: authenticatedReq.user.role,
                 },
                 linkId
@@ -80,6 +80,28 @@ export class PublicLinksController {
                 success: true,
                 message: "Public link revoked successfully",
                 data: updatedLink,
+            });
+        } catch (error) {
+            return next(error);
+        }
+    }
+
+    public async deletePublicLink(req: Request, res: Response, next: NextFunction) {
+        try {
+            const authenticatedReq = req as AuthenticatedRequest;
+            const linkId = req.params.id;
+
+            await publicLinksService.deletePublicLink(
+                {
+                    userId: authenticatedReq.user.userId,
+                    role: authenticatedReq.user.role,
+                },
+                linkId
+            );
+
+            return res.status(200).json({
+                success: true,
+                message: "Public link deleted successfully",
             });
         } catch (error) {
             return next(error);
@@ -106,10 +128,11 @@ export class PublicLinksController {
     public async publicListChildren(req: Request, res: Response, next: NextFunction) {
         try {
             const token = req.params.token;
+            const targetNodeId = req.query.nodeId as string | undefined;
             const page = parseInt(req.query.page as string) || 1;
             const limit = parseInt(req.query.limit as string) || 50;
 
-            const result = await publicLinksService.publicListChildrenByToken(token, page, limit);
+            const result = await publicLinksService.publicListChildrenByToken(token, targetNodeId, page, limit);
 
             return res.status(200).json({
                 success: true,

@@ -18,7 +18,6 @@ type Props = {
     item: PublicNodeResponse;
     isRootFile?: boolean;
 };
-
 export function PublicNodeRow({ item, isRootFile = false }: Props) {
     const navigate = useNavigate();
     const { token } = useParams<{ token: string }>();

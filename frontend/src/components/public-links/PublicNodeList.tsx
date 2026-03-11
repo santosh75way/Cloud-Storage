@@ -18,9 +18,10 @@ export function PublicNodeList() {
     // For now, let's just assume the token resolves to the root folder.
 
     const page = parseInt(searchParams.get("page") || "1", 10);
+    const nodeId = searchParams.get("nodeId") || undefined;
 
     const { data: response, isLoading, isError, isFetching } = useGetPublicChildrenByTokenQuery(
-        { token: token || "", page },
+        { token: token || "", nodeId, page },
         { skip: !token }
     );
 

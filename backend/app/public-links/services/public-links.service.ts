@@ -73,6 +73,26 @@ export class PublicLinksService {
         return updated as PublicLinkResponseDto;
     }
 
+    public async deletePublicLink(
+        actor: AuthenticatedActor,
+        linkId: string
+    ): Promise<void> {
+        if (actor.role !== "ADMIN") {
+            throw new AppError("Only administrators can delete public share links", 403, "FORBIDDEN");
+        }
+
+        const link = await this.repository.findPublicLinkById(linkId);
+        if (!link) {
+            throw new AppError("Public link not found", 404, "LINK_NOT_FOUND");
+        }
+
+        if (link.isActive) {
+            throw new AppError("Active public links cannot be deleted. Revoke it first.", 400, "LINK_IS_ACTIVE");
+        }
+
+        await this.repository.deletePublicLink(linkId);
+    }
+
     public async resolveActivePublicLink(token: string) {
         const link = await this.repository.findPublicLinkByToken(token);
 
@@ -133,18 +153,28 @@ export class PublicLinksService {
         };
     }
 
-    public async publicListChildrenByToken(token: string, page: number = 1, limit: number = 50) {
-        const { node } = await this.resolveActivePublicLink(token);
+    public async publicListChildrenByToken(token: string, targetNodeId?: string, page: number = 1, limit: number = 50) {
+        const { node: rootNode } = await this.resolveActivePublicLink(token);
 
-        if (node.type !== "FOLDER") {
-            throw new AppError("The shared item is a file, not a folder", 400, "INVALID_NODE_TYPE");
+        let parentNodeId = targetNodeId || rootNode.id;
+
+        if (parentNodeId !== rootNode.id) {
+            const isDescendant = await this.isNodeWithinPublicScope(rootNode.id, parentNodeId);
+            if (!isDescendant) {
+                throw new AppError("Access denied: Node is outside the public share scope", 403, "FORBIDDEN_SCOPE");
+            }
+        }
+
+        const parentNode = await this.repository.findNodeById(parentNodeId);
+        if (!parentNode || parentNode.deletedAt || parentNode.type !== "FOLDER") {
+            throw new AppError("The requested item is not a valid folder", 400, "INVALID_NODE_TYPE");
         }
 
         const skip = (page - 1) * limit;
 
         const [items, total] = await Promise.all([
             prisma.node.findMany({
-                where: { parentId: node.id, deletedAt: null },
+                where: { parentId: parentNodeId, deletedAt: null },
                 skip,
                 take: limit,
                 orderBy: [
@@ -164,7 +194,7 @@ export class PublicLinksService {
                 }
             }),
             prisma.node.count({
-                where: { parentId: node.id, deletedAt: null },
+                where: { parentId: parentNodeId, deletedAt: null },
             }),
         ]);
 
