@@ -206,6 +206,17 @@ export class PublicLinksService {
         const expiresInSeconds = 600; // 10 minutes
         const expiresAt = Math.floor(Date.now() / 1000) + expiresInSeconds;
 
+        if (resourceType === "image") {
+            return cloudinaryV2.url(publicId, {
+                secure: true,
+                sign_url: true,
+                resource_type: "image",
+                type: "upload",
+                fetch_format: "auto",
+                quality: "auto",
+            });
+        }
+
         return cloudinaryV2.utils.private_download_url(
             publicId,
             "",

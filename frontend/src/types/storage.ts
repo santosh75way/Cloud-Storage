@@ -54,6 +54,7 @@ export type GenerateUploadSignatureResponse = {
     apiKey: string;
     cloudName: string;
     folder: string;
+    uploadPreset: string;
 };
 
 export type CreateFileNodePayload = {

@@ -10,12 +10,18 @@ import {
   updateProfileValidation,
 } from './auth.validator';
 import { authenticate } from '@/common';
+import {
+  loginLimiter,
+  signupLimiter,
+  forgotPasswordLimiter
+} from '@/common/middleware/rateLimiter';
 
 const router = Router();
 
 // Public routes
 router.post(
   '/signup',
+  signupLimiter,
   signupValidation,
   handleValidationErrors,
   (req: Request, res: Response) => authController.signup(req, res)
@@ -23,6 +29,7 @@ router.post(
 
 router.post(
   '/login',
+  loginLimiter,
   loginValidation,
   handleValidationErrors,
   (req: Request, res: Response) => authController.login(req, res)
@@ -30,6 +37,7 @@ router.post(
 
 router.post(
   '/forgot-password',
+  forgotPasswordLimiter,
   forgotPasswordValidation,
   handleValidationErrors,
   (req: Request, res: Response) => authController.forgotPassword(req, res)
@@ -37,6 +45,7 @@ router.post(
 
 router.post(
   '/reset-password',
+  forgotPasswordLimiter,
   resetPasswordValidation,
   handleValidationErrors,
   (req: Request, res: Response) => authController.resetPassword(req, res)

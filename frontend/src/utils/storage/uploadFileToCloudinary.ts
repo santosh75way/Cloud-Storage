@@ -19,6 +19,7 @@ export async function uploadFileToCloudinary({
   formData.append("timestamp", String(signatureData.timestamp));
   formData.append("signature", signatureData.signature);
   formData.append("folder", signatureData.folder);
+  formData.append("upload_preset", signatureData.uploadPreset);
   formData.append("resource_type", "raw");
 
   const uploadUrl = `https://api.cloudinary.com/v1_1/${signatureData.cloudName}/raw/upload`;
