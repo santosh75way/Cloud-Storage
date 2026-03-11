@@ -72,6 +72,14 @@ const protectedRoutes: RouteObject[] = [
           </AdminProtectedRoute>
         ),
       },
+      {
+        path: "/admin/search",
+        element: (
+          <AdminProtectedRoute>
+            <SearchPage />
+          </AdminProtectedRoute>
+        ),
+      },
     ],
   },
 ];

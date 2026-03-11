@@ -66,18 +66,30 @@ export function AdminExplorerSection({ folderId }: AdminExplorerSectionProps) {
     };
 
     return (
-        <Card sx={{ p: 0, borderRadius: 3, boxShadow: "0 2px 12px rgba(0,0,0,0.04)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+        <Card
+            sx={{
+                borderRadius: 3,
+                border: "1px solid #E2E8F0",
+                boxShadow: "0 1px 6px rgba(0,0,0,0.03)",
+                display: "flex",
+                flexDirection: "column",
+                flex: 1,
+                minHeight: 0,
+                overflow: "hidden",
+                animation: "fadeInUp 0.4s ease-out",
+            }}
+        >
             {/* Breadcrumb Header */}
-            <Box sx={{ p: 2, borderBottom: "1px solid #f1f5f9", bgcolor: "#fff" }}>
+            <Box sx={{ px: 2, py: 1, borderBottom: "1px solid #F1F5F9", bgcolor: "#FAFBFC", flexShrink: 0 }}>
                 <Breadcrumbs aria-label="breadcrumb" separator={<NavigateNext fontSize="small" />}>
-                    <MuiLink component={RouterLink} underline="hover" color="inherit" to="/admin/dashboard" sx={{ fontWeight: isRoot ? 600 : 400, color: isRoot ? "text.primary" : "text.secondary" }}>
+                    <MuiLink component={RouterLink} underline="hover" color="inherit" to="/admin/dashboard" sx={{ fontWeight: isRoot ? 600 : 400, color: isRoot ? "text.primary" : "text.secondary", fontSize: "0.875rem" }}>
                         My Drive
                     </MuiLink>
                     {!isRoot && breadcrumbsQuery.data?.data?.items && breadcrumbsQuery.data.data.items.map((b: { id: string; name: string }, idx: number) => {
                         const isLast = idx === (breadcrumbsQuery.data!.data.items.length - 1);
-                        if (isLast) return <Typography key={b.id} color="text.primary" fontWeight={600}>{b.name}</Typography>;
+                        if (isLast) return <Typography key={b.id} color="text.primary" fontWeight={600} fontSize="0.875rem">{b.name}</Typography>;
                         return (
-                            <MuiLink key={b.id} component={RouterLink} underline="hover" color="inherit" to={`/admin/dashboard/${b.id}`}>
+                            <MuiLink key={b.id} component={RouterLink} underline="hover" color="inherit" to={`/admin/dashboard/${b.id}`} sx={{ fontSize: "0.875rem" }}>
                                 {b.name}
                             </MuiLink>
                         );
@@ -86,7 +98,7 @@ export function AdminExplorerSection({ folderId }: AdminExplorerSectionProps) {
             </Box>
 
             {/* Toolbar */}
-            <Box sx={{ px: 3, pt: 3 }}>
+            <Box sx={{ px: 2, pt: 2, flexShrink: 0 }}>
                 <AdminExplorerToolbar
                     parentId={folderId || null}
                     selectedNodeId={selectedNodeId}
@@ -96,11 +108,11 @@ export function AdminExplorerSection({ folderId }: AdminExplorerSectionProps) {
                 />
             </Box>
 
-            {/* Content Area */}
-            <Box sx={{ px: 3, pb: 3, flexGrow: 1 }}>
+            {/* Content Area — fills remaining space with internal scroll */}
+            <Box sx={{ px: 2, pb: 1, pt: 1, flex: 1, minHeight: 0, overflow: "auto", display: "flex", flexDirection: "column" }}>
                 {isLoading ? (
-                    <Box sx={{ display: "flex", justifyContent: "center", py: 5 }}>
-                        <CircularProgress />
+                    <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+                        <CircularProgress sx={{ color: "#6366f1" }} />
                     </Box>
                 ) : isError ? (
                     <Alert severity="error">{getApiErrorMessage(error, "Failed to load files")}</Alert>
@@ -113,9 +125,9 @@ export function AdminExplorerSection({ folderId }: AdminExplorerSectionProps) {
                     />
                 )}
 
-                {/* Pagination Placeholder */}
+                {/* Pagination */}
                 {meta && meta.totalPages > 1 && (
-                    <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+                    <Box sx={{ display: "flex", justifyContent: "center", mt: "auto", pt: 1, flexShrink: 0 }}>
                         <Pagination
                             count={meta.totalPages}
                             page={page}

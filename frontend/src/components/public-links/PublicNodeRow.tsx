@@ -54,9 +54,10 @@ export function PublicNodeRow({ item, isRootFile = false }: Props) {
             } else {
                 throw new Error("Unable to fetch file URL");
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Failed to open file", err);
-            setLocalError(err.data?.message || err.message || "Failed to open file");
+            const msg = err instanceof Error ? err.message : "Failed to open file";
+            setLocalError(msg);
         }
     };
 

@@ -40,14 +40,15 @@ export function AdminExplorerTable({
 }: AdminExplorerTableProps) {
     if (items.length === 0) {
         return (
-            <Box sx={{ p: 4, textAlign: "center", bgcolor: "white", borderRadius: 2 }}>
-                <Typography color="text.secondary">This folder is empty.</Typography>
+            <Box sx={{ p: 6, textAlign: "center", bgcolor: "white", borderRadius: 3, border: "1px dashed #E2E8F0", animation: "fadeIn 0.3s ease-out" }}>
+                <Typography color="text.secondary" fontWeight={500}>This folder is empty.</Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>Upload files or create a folder to get started.</Typography>
             </Box>
         );
     }
 
     return (
-        <TableContainer sx={{ bgcolor: "white", borderRadius: 2, border: "1px solid #f1f5f9" }}>
+        <TableContainer sx={{ bgcolor: "white", borderRadius: 3, border: "1px solid #E2E8F0", animation: "fadeIn 0.3s ease-out" }}>
             <Table aria-label="explorer table" size="small">
                 <TableHead>
                     <TableRow sx={{ bgcolor: "#f8fafc" }}>
@@ -72,8 +73,10 @@ export function AdminExplorerTable({
                                 onClick={() => onSelectNode(row.id, isFolder)}
                                 sx={{
                                     cursor: "pointer",
-                                    bgcolor: isSelected ? "#f1f5f9" : "inherit",
+                                    bgcolor: isSelected ? "rgba(99, 102, 241, 0.06)" : "inherit",
+                                    transition: "all 0.15s ease",
                                     "&:last-child td, &:last-child th": { border: 0 },
+                                    "&:hover": { bgcolor: isSelected ? "rgba(99, 102, 241, 0.08)" : "rgba(0,0,0,0.015)" },
                                 }}
                             >
                                 <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()}>

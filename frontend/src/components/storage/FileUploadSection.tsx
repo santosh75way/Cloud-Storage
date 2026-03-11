@@ -88,9 +88,9 @@ export function FileUploadSection({ parentId }: FileUploadSectionProps) {
                 cloudinaryPublicId: uploadData.public_id,
                 cloudinaryResourceType: uploadData.resource_type,
             }).unwrap();
-        } catch (error: any) {
+        } catch (error: unknown) {
             setIsUploading(false);
-            setUploadError(error.message || "An unexpected error occurred during upload.");
+            setUploadError(getApiErrorMessage(error, "An unexpected error occurred during upload."));
         } finally {
             if (fileInputRef.current) {
                 fileInputRef.current.value = "";

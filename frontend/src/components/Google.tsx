@@ -5,13 +5,14 @@ import { googleLogin } from "@/services/api";
 import { setCredentials } from "@/store/authSlice";
 import { toast } from "react-toastify";
 import { Box, CircularProgress, Typography } from "@mui/material";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 
 export default function GoogleCall() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const hasCalled = useRef(false);
-  
+
   const code = searchParams.get("code");
   const accessToken = searchParams.get("accessToken");
   const refreshToken = searchParams.get("refreshToken");
@@ -42,8 +43,8 @@ export default function GoogleCall() {
           dispatch(setCredentials(response));
           toast.success("Successfully logged in with Google!");
           navigate("/dashboard");
-        } catch (error: any) {
-          toast.error(error.message || "Google authentication failed");
+        } catch (error: unknown) {
+          toast.error(getErrorMessage(error, "Google authentication failed"));
           navigate("/login");
         }
         return;
@@ -60,16 +61,15 @@ export default function GoogleCall() {
   }, [code, accessToken, refreshToken, userStr, navigate, dispatch]);
 
   return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center"
-      minHeight="100vh"
-      gap={3}
-    >
-      <CircularProgress size={60} thickness={4} sx={{ color: "#6366f1" }} />
-      <Box textAlign="center">
+    <Box sx={styles.container}>
+      <Box sx={styles.content}>
+        <Box sx={styles.spinnerBox}>
+          <CircularProgress
+            size={48}
+            thickness={3}
+            sx={{ color: "#6366f1" }}
+          />
+        </Box>
         <Typography variant="h5" fontWeight={700} gutterBottom>
           Authenticating with Google
         </Typography>
@@ -80,3 +80,22 @@ export default function GoogleCall() {
     </Box>
   );
 }
+
+const styles = {
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "100vh",
+    background: "linear-gradient(135deg, #F8FAFC 0%, #EEF2FF 50%, #F1F5F9 100%)",
+  },
+  content: {
+    textAlign: "center",
+    animation: "fadeIn 0.5s ease-out",
+  },
+  spinnerBox: {
+    mb: 3,
+    animation: "pulse 2s ease-in-out infinite",
+  },
+};

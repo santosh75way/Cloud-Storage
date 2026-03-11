@@ -18,13 +18,14 @@ import {
   KeyboardArrowDown,
   CloudQueue as DriveIcon,
   Search as SearchIcon,
+  PeopleAltOutlined as SharedIcon,
 } from "@mui/icons-material";
 import { Suspense, useState } from "react";
 import { logout } from "@/store/authSlice";
 import { type RootState } from "@/store";
 import { useDispatch, useSelector } from "react-redux";
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import CheckIcon from '@mui/icons-material/Check';
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import CheckIcon from "@mui/icons-material/Check";
 
 const AuthLayout = () => {
   const navigate = useNavigate();
@@ -33,11 +34,11 @@ const AuthLayout = () => {
   const user = useSelector((state: RootState) => state.auth.user);
 
   const navItems = [
-    { label: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
-    { label: "My Drive", icon: <DriveIcon />, path: "/drive" },
-    { label: "Shared With Me", icon: <DriveIcon />, path: "/shared-with-me" },
-    { label: "Search", icon: <SearchIcon />, path: "/search" },
-    { label: "Profile", icon: <ProfileIcon />, path: "/profile/user" },
+    { label: "Dashboard", icon: <DashboardIcon fontSize="small" />, path: "/dashboard" },
+    { label: "My Drive", icon: <DriveIcon fontSize="small" />, path: "/drive" },
+    { label: "Shared", icon: <SharedIcon fontSize="small" />, path: "/shared-with-me" },
+    { label: "Search", icon: <SearchIcon fontSize="small" />, path: "/search" },
+    { label: "Profile", icon: <ProfileIcon fontSize="small" />, path: "/profile/user" },
   ];
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -66,11 +67,11 @@ const AuthLayout = () => {
           <Toolbar disableGutters sx={styles.toolbar}>
             <Typography
               variant="h6"
-              fontWeight={700}
+              fontWeight={800}
               sx={styles.logo}
               onClick={() => navigate("/dashboard")}
             >
-              Web App
+              ☁ CloudVault
             </Typography>
 
             <Box sx={styles.navLinks}>
@@ -112,28 +113,42 @@ const AuthLayout = () => {
               anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
               sx={styles.menu}
             >
-              <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid #e2e8f0', mb: 1 }}>
+              <Box sx={styles.menuHeader}>
                 <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
                   Signed in as
                 </Typography>
                 <Typography variant="body2" fontWeight={600} noWrap>
                   {user?.email}
                 </Typography>
-                <Box sx={{ mt: 1.5, p: 1, bgcolor: '#f1f5f9', borderRadius: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Box sx={{ overflow: 'hidden' }}>
-                    <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                <Box sx={styles.userIdBox}>
+                  <Box sx={{ overflow: "hidden" }}>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      display="block"
+                      sx={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: 0.5 }}
+                    >
                       User ID
                     </Typography>
-                    <Typography variant="caption" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>
-                      {user?.id ? `${user.id.substring(0, 10)}...` : 'Unknown'}
+                    <Typography variant="caption" sx={{ fontFamily: "monospace", fontWeight: 600 }}>
+                      {user?.id ? `${user.id.substring(0, 10)}...` : "Unknown"}
                     </Typography>
                   </Box>
                   <Button
                     size="small"
                     onClick={handleCopyId}
-                    sx={{ minWidth: 'auto', p: 0.5, color: copied ? 'success.main' : 'text.secondary' }}
+                    sx={{
+                      minWidth: "auto",
+                      p: 0.5,
+                      color: copied ? "success.main" : "text.secondary",
+                      transition: "all 0.2s ease",
+                    }}
                   >
-                    {copied ? <CheckIcon sx={{ fontSize: 16 }} /> : <ContentCopyIcon sx={{ fontSize: 16 }} />}
+                    {copied ? (
+                      <CheckIcon sx={{ fontSize: 16 }} />
+                    ) : (
+                      <ContentCopyIcon sx={{ fontSize: 16 }} />
+                    )}
                   </Button>
                 </Box>
               </Box>
@@ -149,7 +164,13 @@ const AuthLayout = () => {
 
       <Box component="main" sx={styles.main}>
         <Container maxWidth="xl" sx={styles.container}>
-          <Suspense fallback={<Box sx={styles.loading}><CircularProgress /></Box>}>
+          <Suspense
+            fallback={
+              <Box sx={styles.loading}>
+                <CircularProgress />
+              </Box>
+            }
+          >
             <Outlet />
           </Suspense>
         </Container>
@@ -162,64 +183,78 @@ export default AuthLayout;
 
 const styles = {
   root: {
-    minHeight: "100vh",
-    bgcolor: "#f8f9fa",
+    height: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden",
+    bgcolor: "#F8FAFC",
   },
   appBar: {
-    bgcolor: "#fff",
-    borderBottom: "1px solid #e9ecef",
-    color: "#212529",
+    bgcolor: "rgba(255, 255, 255, 0.8)",
+    backdropFilter: "blur(16px)",
+    borderBottom: "1px solid rgba(226, 232, 240, 0.8)",
+    color: "#0F172A",
+    animation: "slideDown 0.3s ease-out",
   },
   toolbar: {
     justifyContent: "space-between",
-    py: 1,
+    py: 0.5,
+    minHeight: { xs: 56, sm: 64 },
   },
   logo: {
     cursor: "pointer",
-    color: "primary.main",
+    background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
     letterSpacing: -0.5,
+    transition: "opacity 0.2s ease",
     "&:hover": {
       opacity: 0.8,
     },
   },
   navLinks: {
-    display: "flex",
-    gap: 1,
+    display: { xs: "none", md: "flex" },
+    gap: 0.5,
     flex: 1,
-    ml: 6,
+    ml: 4,
   },
   navButton: {
-    color: "#6c757d",
+    color: "#64748B",
     textTransform: "none",
     fontWeight: 500,
     px: 2,
-    py: 1,
+    py: 0.875,
     borderRadius: 2,
+    fontSize: "0.8125rem",
+    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
     "&:hover": {
-      bgcolor: "#f8f9fa",
-      color: "#212529",
+      bgcolor: "rgba(99, 102, 241, 0.04)",
+      color: "#4F46E5",
+      transform: "translateY(-1px)",
     },
   },
   navButtonActive: {
-    color: "primary.main",
-    bgcolor: "#e7f5ff",
+    color: "#4F46E5",
+    bgcolor: "rgba(99, 102, 241, 0.08)",
+    fontWeight: 600,
     "&:hover": {
-      bgcolor: "#d0ebff",
+      bgcolor: "rgba(99, 102, 241, 0.12)",
     },
   },
   userButton: {
     textTransform: "none",
-    color: "#212529",
-    borderRadius: 2,
+    color: "#0F172A",
+    borderRadius: 2.5,
     px: 1.5,
+    transition: "all 0.2s ease",
     "&:hover": {
-      bgcolor: "#f8f9fa",
+      bgcolor: "rgba(99, 102, 241, 0.04)",
     },
   },
   avatar: {
     width: 32,
     height: 32,
-    bgcolor: "primary.main",
+    background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
     fontSize: "0.875rem",
     fontWeight: 600,
   },
@@ -232,24 +267,51 @@ const styles = {
   menu: {
     "& .MuiPaper-root": {
       mt: 1,
-      minWidth: 180,
-      borderRadius: 2,
-      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+      minWidth: 220,
+      borderRadius: 3,
+      border: "1px solid #E2E8F0",
+      boxShadow: "0 10px 40px rgba(0, 0, 0, 0.08)",
     },
   },
+  menuHeader: {
+    px: 2,
+    py: 1.5,
+    borderBottom: "1px solid #F1F5F9",
+    mb: 1,
+  },
+  userIdBox: {
+    mt: 1.5,
+    p: 1,
+    bgcolor: "#F8FAFC",
+    borderRadius: 2,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    border: "1px solid #F1F5F9",
+  },
   logoutItem: {
-    color: "#dc3545",
+    color: "#EF4444",
     fontWeight: 500,
+    mx: 1,
+    borderRadius: 2,
     "&:hover": {
-      bgcolor: "#fff5f5",
+      bgcolor: "#FEF2F2",
     },
   },
   main: {
-    py: 4,
     flex: 1,
+    minHeight: 0,
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden",
+    animation: "fadeIn 0.4s ease-out",
   },
   container: {
-    minHeight: "calc(100vh - 120px)",
+    flex: 1,
+    minHeight: 0,
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden",
   },
   loading: {
     display: "flex",

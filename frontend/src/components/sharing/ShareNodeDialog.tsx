@@ -55,8 +55,9 @@ export function ShareNodeDialog({ open, onClose, node }: ShareNodeDialogProps) {
 
             setTargetUserId("");
             setPermission("VIEW");
-        } catch (error: any) {
-            setLocalError(error?.data?.message || "Failed to share node");
+        } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : "Failed to share node";
+            setLocalError(msg);
         }
     };
 

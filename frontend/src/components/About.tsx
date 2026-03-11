@@ -1,46 +1,119 @@
+import {
+    Box,
+    Container,
+    Typography,
+    Paper,
+    Stack,
+} from "@mui/material";
+import {
+    LockOutlined,
+    BoltOutlined,
+    CloudSyncOutlined,
+} from "@mui/icons-material";
+
+const features = [
+    {
+        icon: <LockOutlined />,
+        title: "Secure",
+        description: "End-to-end encryption for all your sensitive data and files.",
+        gradient: "linear-gradient(135deg, #6366f1, #818cf8)",
+        bgColor: "#EEF2FF",
+    },
+    {
+        icon: <BoltOutlined />,
+        title: "Fast",
+        description: "Optimized performance for quick uploads and lightning-fast downloads.",
+        gradient: "linear-gradient(135deg, #8B5CF6, #A78BFA)",
+        bgColor: "#F5F3FF",
+    },
+    {
+        icon: <CloudSyncOutlined />,
+        title: "Anywhere",
+        description: "Access your files from any device, anywhere in the world.",
+        gradient: "linear-gradient(135deg, #3B82F6, #60A5FA)",
+        bgColor: "#EFF6FF",
+    },
+];
+
 export default function About() {
     return (
-        <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] p-8">
-            <div className="max-w-4xl w-full space-y-8 text-center">
-                <h1 className="text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 sm:text-6xl">
-                    About Cloud Storage
-                </h1>
-                <p className="text-lg leading-8 text-slate-600 max-w-2xl mx-auto">
-                    Secure, seamless, and stunning cloud storage for all your files. Built with a focus on speed, security, and a premium user experience.
-                </p>
+        <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
+            <Box sx={{ textAlign: "center", mb: 8, animation: "fadeInUp 0.5s ease-out" }}>
+                <Typography
+                    variant="h2"
+                    fontWeight={800}
+                    sx={{
+                        background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        mb: 2,
+                        fontSize: { xs: "2rem", md: "3rem" },
+                    }}
+                >
+                    About CloudVault
+                </Typography>
+                <Typography
+                    variant="h6"
+                    color="text.secondary"
+                    fontWeight={400}
+                    sx={{ maxWidth: 600, mx: "auto", lineHeight: 1.7 }}
+                >
+                    Secure, seamless, and stunning cloud storage for all your files.
+                    Built with a focus on speed, security, and a premium user experience.
+                </Typography>
+            </Box>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-                    <div className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 mx-auto mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                            </svg>
-                        </div>
-                        <h3 className="text-xl font-semibold text-slate-900 mb-2">Secure</h3>
-                        <p className="text-slate-500">End-to-end encryption for all your sensitive data and files.</p>
-                    </div>
-
-                    <div className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-                        <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 mx-auto mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-                            </svg>
-                        </div>
-                        <h3 className="text-xl font-semibold text-slate-900 mb-2">Fast</h3>
-                        <p className="text-slate-500">Optimized performance for quick uploads and lightning-fast downloads.</p>
-                    </div>
-
-                    <div className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-                        <div className="w-12 h-12 bg-violet-100 rounded-lg flex items-center justify-center text-violet-600 mx-auto mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 7.5h-.75A2.25 2.25 0 004.5 9.75v7.5a2.25 2.25 0 002.25 2.25h7.5a2.25 2.25 0 002.25-2.25v-7.5a2.25 2.25 0 00-2.25-2.25h-.75m0-3l-3-3m0 0l-3 3m3-3v11.25m6-2.25h.75a2.25 2.25 0 012.25 2.25v7.5a2.25 2.25 0 01-2.25 2.25h-7.5a2.25 2.25 0 01-2.25-2.25v-.75" />
-                            </svg>
-                        </div>
-                        <h3 className="text-xl font-semibold text-slate-900 mb-2">Anywhere</h3>
-                        <p className="text-slate-500">Access your files from any device, anywhere in the world.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+            <Stack
+                direction={{ xs: "column", md: "row" }}
+                spacing={3}
+                sx={{ justifyContent: "center" }}
+            >
+                {features.map((feature, index) => (
+                    <Paper
+                        key={feature.title}
+                        elevation={0}
+                        sx={{
+                            flex: 1,
+                            p: 4,
+                            borderRadius: 4,
+                            border: "1px solid #E2E8F0",
+                            textAlign: "center",
+                            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                            animation: `fadeInUp 0.5s ease-out ${index * 0.1}s both`,
+                            cursor: "default",
+                            "&:hover": {
+                                transform: "translateY(-6px)",
+                                boxShadow: "0 12px 32px rgba(0, 0, 0, 0.08)",
+                                borderColor: "transparent",
+                            },
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                width: 56,
+                                height: 56,
+                                background: feature.gradient,
+                                borderRadius: 3,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                color: "#fff",
+                                mx: "auto",
+                                mb: 3,
+                                boxShadow: `0 4px 14px ${feature.bgColor}`,
+                            }}
+                        >
+                            {feature.icon}
+                        </Box>
+                        <Typography variant="h5" fontWeight={700} sx={{ mb: 1.5 }}>
+                            {feature.title}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                            {feature.description}
+                        </Typography>
+                    </Paper>
+                ))}
+            </Stack>
+        </Container>
     );
 }

@@ -75,15 +75,19 @@ export function SearchPage() {
     const totalPages = searchData?.data.totalPages ?? 1;
 
     const content = (
-        <Stack spacing={4}>
-            <DriveContentHeader
-                title="Search"
-                breadcrumbs={<Typography color="text.primary">Advanced Search</Typography>}
-                actions={<Box sx={{ width: 300 }}><SearchBar value={q} onChange={handleQChange} /></Box>}
-            />
+        <Stack spacing={2} sx={{ height: "100%", flex: 1, minHeight: 0, overflow: "hidden" }}>
+            {/* Header — pinned */}
+            <Box sx={{ flexShrink: 0 }}>
+                <DriveContentHeader
+                    title="Search"
+                    breadcrumbs={<Typography color="text.primary" fontSize="0.875rem">Advanced Search</Typography>}
+                    actions={<Box sx={{ width: 280 }}><SearchBar value={q} onChange={handleQChange} /></Box>}
+                />
+            </Box>
 
-            <Stack direction={{ xs: "column", md: "row" }} spacing={4}>
-                <Box sx={{ width: { xs: "100%", md: 280 }, flexShrink: 0 }}>
+            {/* Main content — filters + results side by side, fills remaining space */}
+            <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
+                <Box sx={{ width: { xs: "100%", md: 240 }, flexShrink: 0 }}>
                     <SearchFilters
                         type={type}
                         ownership={ownership}
@@ -93,26 +97,28 @@ export function SearchPage() {
                         onChangeSharedStatus={handleSharedStatusChange}
                     />
                 </Box>
-                <Box sx={{ flexGrow: 1 }}>
-                    <Stack spacing={3}>
-                        {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
+                <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+                    {errorMessage ? <Alert severity="error" sx={{ mb: 1, flexShrink: 0 }}>{errorMessage}</Alert> : null}
 
-                        {isLoading ? (
-                            <Box display="flex" justifyContent="center" py={8}>
-                                <CircularProgress />
-                            </Box>
-                        ) : (
-                            <>
+                    {isLoading ? (
+                        <Box display="flex" justifyContent="center" alignItems="center" flex={1}>
+                            <CircularProgress sx={{ color: "#6366f1" }} />
+                        </Box>
+                    ) : (
+                        <>
+                            <Box sx={{ flex: 1, minHeight: 0, overflow: "auto" }}>
                                 <SearchResultsList items={items} currentUserId={user?.id} />
+                            </Box>
+                            <Box sx={{ flexShrink: 0, mt: 1 }}>
                                 <DrivePagination
                                     page={page}
                                     totalPages={totalPages}
                                     total={total}
                                     onChange={setPage}
                                 />
-                            </>
-                        )}
-                    </Stack>
+                            </Box>
+                        </>
+                    )}
                 </Box>
             </Stack>
         </Stack>

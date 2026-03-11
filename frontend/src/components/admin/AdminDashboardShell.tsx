@@ -7,22 +7,40 @@ type AdminDashboardShellProps = {
 
 export function AdminDashboardShell({ explorerSection }: AdminDashboardShellProps) {
     return (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 3, p: { xs: 2, sm: 3, md: 4 } }}>
-            {/* Top Row: Explorer and Recent Activity */}
+        <Box
+            sx={{
+                display: "flex",
+                flexDirection: { xs: "column", lg: "row" },
+                gap: 2,
+                p: { xs: 1.5, sm: 2, md: 2.5 },
+                animation: "fadeIn 0.4s ease-out",
+                flex: 1,
+                minHeight: 0,
+                overflow: "hidden",
+                alignItems: "stretch",
+            }}
+        >
             <Box
                 sx={{
+                    flex: 1,
+                    minWidth: 0,
+                    minHeight: 0,
                     display: "flex",
-                    flexDirection: { xs: "column", lg: "row" },
-                    gap: 3,
-                    alignItems: "flex-start"
+                    flexDirection: "column",
                 }}
             >
-                <Box sx={{ flexGrow: 1, minWidth: 0, width: "100%" }}>
-                    {explorerSection}
-                </Box>
-                <Box sx={{ flexShrink: 0 }}>
-                    <AdminRecentActivity />
-                </Box>
+                {explorerSection}
+            </Box>
+            <Box
+                sx={{
+                    flexShrink: 0,
+                    width: { lg: 300 },
+                    display: "flex",
+                    flexDirection: "column",
+                    minHeight: 0,
+                }}
+            >
+                <AdminRecentActivity />
             </Box>
         </Box>
     );
