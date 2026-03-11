@@ -39,6 +39,12 @@ export function FileUploadSection({ parentId }: FileUploadSectionProps) {
         const file = event.target.files?.[0];
         if (!file) return;
 
+        if (file.size > 10 * 1024 * 1024) { // 10MB
+            setUploadError("File exceeds the maximum upload size of 10MB.");
+            if (fileInputRef.current) fileInputRef.current.value = "";
+            return;
+        }
+
         setUploadError(null);
 
         try {
@@ -49,7 +55,7 @@ export function FileUploadSection({ parentId }: FileUploadSectionProps) {
                 mimeType: file.type || "application/octet-stream",
             }).unwrap();
 
-            const { signature, timestamp, apiKey, cloudName, folder } = signRes.data;
+            const { signature, timestamp, apiKey, cloudName, folder, uploadPreset } = signRes.data;
 
             // 2. Upload to Cloudinary
             setIsUploading(true);
@@ -59,6 +65,7 @@ export function FileUploadSection({ parentId }: FileUploadSectionProps) {
             formData.append("timestamp", String(timestamp));
             formData.append("signature", signature);
             formData.append("folder", folder);
+            formData.append("upload_preset", uploadPreset);
 
             const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
 
@@ -90,7 +97,14 @@ export function FileUploadSection({ parentId }: FileUploadSectionProps) {
             }).unwrap();
         } catch (error: unknown) {
             setIsUploading(false);
-            setUploadError(getApiErrorMessage(error, "An unexpected error occurred during upload."));
+
+            // Map noisy Cloudinary signature errors to a friendly message
+            const rawError = getApiErrorMessage(error, "An unexpected error occurred during upload.");
+            const friendlyError = rawError.includes("Invalid Signature")
+                ? "Upload rejected by the server due to a security signature mismatch. Please try again."
+                : rawError;
+
+            setUploadError(friendlyError);
         } finally {
             if (fileInputRef.current) {
                 fileInputRef.current.value = "";

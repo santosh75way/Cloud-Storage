@@ -25,6 +25,7 @@ type CloudinaryUploadSignatureResult = {
     apiKey: string;
     cloudName: string;
     folder: string;
+    uploadPreset: string;
 };
 
 export class StorageService {
@@ -101,6 +102,17 @@ export class StorageService {
     private buildSignedFileAccessUrl(publicId: string, resourceType: string): string {
         const expiresInSeconds = 600; // 10 minutes
         const expiresAt = Math.floor(Date.now() / 1000) + expiresInSeconds;
+
+        if (resourceType === "image") {
+            return cloudinaryV2.url(publicId, {
+                secure: true,
+                sign_url: true,
+                resource_type: "image",
+                type: "upload",
+                fetch_format: "auto",
+                quality: "auto",
+            });
+        }
 
         return cloudinaryV2.utils.private_download_url(
             publicId,
@@ -322,12 +334,14 @@ export class StorageService {
         await this.assertFolderExistsForWriteAccess(actor, payload.folderId);
 
         const timestamp = Math.floor(Date.now() / 1000);
-        const folder = env.CLOUDINARY_UPLOAD_FOLDER;
+        const folder = `${env.CLOUDINARY_UPLOAD_FOLDER}/${actor.userId}`;
+        const uploadPreset = env.CLOUDINARY_UPLOAD_PRESET;
 
         const signature = cloudinaryV2.utils.api_sign_request(
             {
                 timestamp,
                 folder,
+                upload_preset: uploadPreset,
             },
             env.CLOUDINARY_API_SECRET
         );
@@ -338,6 +352,7 @@ export class StorageService {
             apiKey: env.CLOUDINARY_API_KEY,
             cloudName: env.CLOUDINARY_CLOUD_NAME,
             folder,
+            uploadPreset,
         };
     }
 

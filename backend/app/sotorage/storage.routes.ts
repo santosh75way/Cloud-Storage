@@ -2,6 +2,7 @@ import { Router } from "express";
 import { storageController } from "./storage.controller";
 
 import { authenticate, authorize } from "@/common";
+import { uploadSignatureLimiter } from "@/common/middleware/rateLimiter";
 
 const storageRouter = Router();
 
@@ -14,6 +15,7 @@ storageRouter.post(
 storageRouter.post(
     "/uploads/sign",
     authenticate,
+    uploadSignatureLimiter,
     storageController.generateUploadSignature.bind(storageController)
 );
 

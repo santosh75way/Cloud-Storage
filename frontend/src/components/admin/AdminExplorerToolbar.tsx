@@ -100,6 +100,12 @@ export function AdminExplorerToolbar({
         const file = event.target.files?.[0];
         if (!file) return;
         setUploadError(null);
+
+        if (file.size > 10 * 1024 * 1024) { // 10MB
+            setUploadError("File exceeds the maximum upload size of 10MB.");
+            if (fileInputRef.current) fileInputRef.current.value = "";
+            return;
+        }
         try {
             const signRes = await generateSignature({
                 fileName: file.name,
@@ -107,7 +113,7 @@ export function AdminExplorerToolbar({
                 mimeType: file.type || "application/octet-stream",
             }).unwrap();
 
-            const { signature, timestamp, apiKey, cloudName, folder } = signRes.data;
+            const { signature, timestamp, apiKey, cloudName, folder, uploadPreset } = signRes.data;
 
             setIsUploading(true);
             const formData = new FormData();
@@ -116,6 +122,7 @@ export function AdminExplorerToolbar({
             formData.append("timestamp", String(timestamp));
             formData.append("signature", signature);
             formData.append("folder", folder);
+            formData.append("upload_preset", uploadPreset);
 
             const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
             const uploadResponse = await fetch(cloudinaryUrl, { method: "POST", body: formData });
@@ -138,7 +145,13 @@ export function AdminExplorerToolbar({
             }).unwrap();
         } catch (error: unknown) {
             setIsUploading(false);
-            setUploadError(getApiErrorMessage(error, "Upload failed"));
+
+            const rawError = getApiErrorMessage(error, "Upload failed");
+            const friendlyError = rawError.includes("Invalid Signature")
+                ? "Upload rejected due to a security signature mismatch. Please try again."
+                : rawError;
+
+            setUploadError(friendlyError);
         } finally {
             if (fileInputRef.current) fileInputRef.current.value = "";
         }

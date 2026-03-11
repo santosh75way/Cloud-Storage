@@ -50,6 +50,13 @@ export function UploadFileButton({ parentId }: UploadFileButtonProps) {
         if (!file) return;
 
         setLocalError(null);
+
+        if (file.size > 10 * 1024 * 1024) { // 10MB
+            setLocalError("File exceeds the maximum upload size of 10MB.");
+            resetFileInput();
+            return;
+        }
+
         setIsUploading(true);
 
         try {
@@ -75,7 +82,12 @@ export function UploadFileButton({ parentId }: UploadFileButtonProps) {
 
             resetFileInput();
         } catch (error) {
-            setLocalError(getApiErrorMessage(error, "File upload failed."));
+            const rawError = getApiErrorMessage(error, "File upload failed.");
+            const friendlyError = rawError.includes("Invalid Signature")
+                ? "Upload rejected by the server due to a security signature mismatch. Please try again."
+                : rawError;
+
+            setLocalError(friendlyError);
         } finally {
             setIsUploading(false);
         }
