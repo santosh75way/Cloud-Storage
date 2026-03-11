@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { forgotPassword } from "@/services/api";
 import { toast } from "react-toastify";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Enter a valid email address"),
@@ -42,8 +43,8 @@ export default function ForgotPassword() {
     try {
       await forgotPassword({ email: data.email });
       toast.success("Password reset link has been sent to your email!");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to send reset link.");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Failed to send reset link."));
     }
   };
 
@@ -51,15 +52,10 @@ export default function ForgotPassword() {
     <Box sx={styles.mainContainer}>
       <Container maxWidth="xs">
         <Paper elevation={0} sx={styles.paper}>
-          <Box sx={styles.avatarBox}>
-            <LockResetOutlined sx={{ fontSize: 32 }} />
+          <Box sx={styles.iconBox}>
+            <LockResetOutlined sx={{ fontSize: 28, color: "#fff" }} />
           </Box>
-          <Typography
-            variant="h4"
-            fontWeight="900"
-            gutterBottom
-            letterSpacing={-1}
-          >
+          <Typography variant="h4" fontWeight={800} gutterBottom letterSpacing={-0.5}>
             Forgot Password
           </Typography>
           <Typography variant="body2" color="text.secondary" mb={4}>
@@ -78,7 +74,7 @@ export default function ForgotPassword() {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <EmailOutlined color="action" />
+                      <EmailOutlined sx={{ color: "#94A3B8" }} />
                     </InputAdornment>
                   ),
                 }}
@@ -104,10 +100,7 @@ export default function ForgotPassword() {
           <Box mt={4}>
             <Typography variant="body2" color="text.secondary">
               Remember your password?{" "}
-              <Link
-                onClick={() => navigate("/login")}
-                sx={styles.signInLink}
-              >
+              <Link onClick={() => navigate("/login")} sx={styles.signInLink}>
                 Sign In
               </Link>
             </Typography>
@@ -124,38 +117,43 @@ const styles = {
     display: "flex",
     alignItems: "center",
     py: 4,
-    background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
+    background: "linear-gradient(135deg, #F8FAFC 0%, #EEF2FF 50%, #F1F5F9 100%)",
   },
   paper: {
-    p: 5,
-    borderRadius: 6,
+    p: { xs: 4, sm: 5 },
+    borderRadius: 4,
     textAlign: "center",
-    background: "rgba(255, 255, 255, 0.95)",
+    background: "rgba(255, 255, 255, 0.9)",
     backdropFilter: "blur(20px)",
-    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)",
+    border: "1px solid rgba(226, 232, 240, 0.6)",
+    boxShadow: "0 20px 50px -12px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.02)",
+    animation: "fadeInUp 0.5s ease-out",
   },
-  avatarBox: {
-    width: 60,
-    height: 60,
-    bgcolor: "#e0e7ff",
-    borderRadius: "50%",
+  iconBox: {
+    width: 56,
+    height: 56,
+    background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+    borderRadius: 3,
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     mx: "auto",
     mb: 3,
-    color: "#6366f1",
+    boxShadow: "0 4px 14px rgba(99, 102, 241, 0.3)",
   },
   submitButton: {
     py: 1.5,
-    borderRadius: 3,
+    borderRadius: 2.5,
     fontWeight: 700,
     textTransform: "none",
-    fontSize: "1rem",
-    background: "linear-gradient(45deg, #6366f1, #8b5cf6)",
-    boxShadow: "0 10px 15px -3px rgba(99, 102, 241, 0.4)",
+    fontSize: "0.9375rem",
+    background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+    boxShadow: "0 4px 14px rgba(99, 102, 241, 0.35)",
+    transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
     "&:hover": {
-      background: "linear-gradient(45deg, #4f46e5, #7c3aed)",
+      background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
+      boxShadow: "0 6px 20px rgba(99, 102, 241, 0.45)",
+      transform: "translateY(-1px)",
     },
   },
   signInLink: {
@@ -163,7 +161,9 @@ const styles = {
     fontWeight: 700,
     color: "#6366f1",
     textDecoration: "none",
+    transition: "color 0.2s ease",
     "&:hover": {
+      color: "#4F46E5",
       textDecoration: "underline",
     },
   },

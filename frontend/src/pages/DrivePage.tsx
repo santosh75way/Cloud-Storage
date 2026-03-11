@@ -76,8 +76,8 @@ export function DrivePage() {
 
     if (isLoading) {
         return (
-            <Box display="flex" justifyContent="center" py={8}>
-                <CircularProgress />
+            <Box display="flex" justifyContent="center" alignItems="center" height="calc(100vh - 88px)">
+                <CircularProgress sx={{ color: "#6366f1" }} />
             </Box>
         );
     }
@@ -85,25 +85,34 @@ export function DrivePage() {
     return (
         <DriveExplorerLayout
             content={
-                <Stack spacing={4}>
-                    <DriveContentHeader
-                        title="Cloud Storage"
-                        breadcrumbs={<DriveBreadcrumbs items={breadcrumbs} />}
-                        actions={<DriveToolbar parentId={folderId} />}
-                    />
+                <Stack spacing={2} sx={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
+                    {/* Header — fixed at top, doesn't scroll */}
+                    <Box sx={{ flexShrink: 0 }}>
+                        <DriveContentHeader
+                            title="Cloud Storage"
+                            breadcrumbs={<DriveBreadcrumbs items={breadcrumbs} />}
+                            actions={<DriveToolbar parentId={folderId} />}
+                        />
 
-                    <ReadOnlyBanner isReadOnly={isReadOnly} />
+                        <ReadOnlyBanner isReadOnly={isReadOnly} />
 
-                    {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
+                        {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
+                    </Box>
 
-                    <DriveNodeList items={items} />
+                    {/* Scrollable file list area */}
+                    <Box sx={{ flex: 1, minHeight: 0, overflow: "auto" }}>
+                        <DriveNodeList items={items} />
+                    </Box>
 
-                    <DrivePagination
-                        page={page}
-                        totalPages={totalPages}
-                        total={total}
-                        onChange={setPage}
-                    />
+                    {/* Pagination — fixed at bottom */}
+                    <Box sx={{ flexShrink: 0 }}>
+                        <DrivePagination
+                            page={page}
+                            totalPages={totalPages}
+                            total={total}
+                            onChange={setPage}
+                        />
+                    </Box>
                 </Stack>
             }
         />

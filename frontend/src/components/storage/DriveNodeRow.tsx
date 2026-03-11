@@ -6,6 +6,7 @@ import {
     ListItemText,
     Stack,
     Tooltip,
+    Box,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -40,28 +41,35 @@ export function DriveNodeRow({ item }: DriveNodeRowProps) {
         }
     };
 
-    const secondaryText = item.type === "FOLDER" ? "Folder" : "File";
+    const isFolder = item.type === "FOLDER";
+    const secondaryText = isFolder ? "Folder" : "File";
 
     return (
         <>
             {localError ? (
-                <Alert severity="error" onClose={() => setLocalError(null)} sx={{ mb: 1 }}>
+                <Alert severity="error" onClose={() => setLocalError(null)} sx={{ mb: 1, borderRadius: 2 }}>
                     {localError}
                 </Alert>
             ) : null}
             <ListItem
                 divider
                 secondaryAction={
-                    <Stack direction="row" spacing={1}>
+                    <Stack direction="row" spacing={0.5}>
                         {isAdmin && (
                             <>
                                 <Tooltip title="Public Links">
-                                    <IconButton onClick={(e) => { e.stopPropagation(); setPublicLinkDialogOpen(true); }}>
+                                    <IconButton
+                                        onClick={(e) => { e.stopPropagation(); setPublicLinkDialogOpen(true); }}
+                                        size="small"
+                                    >
                                         <LinkOutlined fontSize="small" />
                                     </IconButton>
                                 </Tooltip>
                                 <Tooltip title="Share">
-                                    <IconButton onClick={(e) => { e.stopPropagation(); setShareDialogOpen(true); }}>
+                                    <IconButton
+                                        onClick={(e) => { e.stopPropagation(); setShareDialogOpen(true); }}
+                                        size="small"
+                                    >
                                         <ShareOutlined fontSize="small" />
                                     </IconButton>
                                 </Tooltip>
@@ -76,28 +84,39 @@ export function DriveNodeRow({ item }: DriveNodeRowProps) {
                 }
                 onClick={handleOpen}
                 sx={{
-                    cursor: item.type === "FOLDER" ? "pointer" : "default",
+                    cursor: isFolder ? "pointer" : "default",
+                    borderRadius: 2,
+                    mx: 0.5,
+                    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                    borderBottom: "1px solid #F1F5F9",
+                    "&:hover": {
+                        bgcolor: "rgba(99, 102, 241, 0.03)",
+                    },
                 }}
             >
-                <ListItemIcon>
-                    {item.type === "FOLDER" ? <FolderOutlined /> : <DescriptionOutlined />}
+                <ListItemIcon sx={{ minWidth: 42 }}>
+                    <Box
+                        sx={{
+                            p: 0.75,
+                            borderRadius: 1.5,
+                            display: "flex",
+                            bgcolor: isFolder ? "rgba(245, 158, 11, 0.08)" : "rgba(99, 102, 241, 0.06)",
+                        }}
+                    >
+                        {isFolder ? (
+                            <FolderOutlined sx={{ color: "#F59E0B" }} />
+                        ) : (
+                            <DescriptionOutlined sx={{ color: "#6366f1" }} />
+                        )}
+                    </Box>
                 </ListItemIcon>
 
-                <ListItemText primary={item.name} secondary={secondaryText} />
-
-                {item.type === "FOLDER" ? (
-                    <Tooltip title="Open folder">
-                        <IconButton
-                            edge="end"
-                            onClick={(event) => {
-                                event.stopPropagation();
-                                handleOpen();
-                            }}
-                        >
-                            <FolderOutlined />
-                        </IconButton>
-                    </Tooltip>
-                ) : null}
+                <ListItemText
+                    primary={item.name}
+                    secondary={secondaryText}
+                    primaryTypographyProps={{ fontWeight: 600, fontSize: "0.875rem" }}
+                    secondaryTypographyProps={{ fontSize: "0.75rem" }}
+                />
             </ListItem>
 
             {isAdmin && (

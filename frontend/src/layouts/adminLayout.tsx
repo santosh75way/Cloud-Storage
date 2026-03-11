@@ -3,22 +3,25 @@ import { Outlet } from "react-router-dom";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 
-const DRAWER_WIDTH = 240;
+
 
 const LayoutRoot = styled(Box)(({ theme }) => ({
   display: "flex",
-  minHeight: "100vh",
+  height: "100vh",
+  overflow: "hidden",
   backgroundColor: theme.palette.background.default,
 }));
 
 const MainContent = styled("main")(({ theme }) => ({
   flexGrow: 1,
-  paddingTop: "56px",
-  paddingLeft: `${DRAWER_WIDTH}px`,
-  width: `calc(100% - ${DRAWER_WIDTH}px)`,
-  overflowX: "hidden",
-  [theme.breakpoints.up("sm")]: {
-    paddingTop: "64px",
+  height: "100vh",
+  paddingTop: "64px",
+  display: "flex",
+  flexDirection: "column",
+  overflow: "hidden",
+  animation: "fadeIn 0.4s ease-out",
+  [theme.breakpoints.down("sm")]: {
+    paddingTop: "56px",
   },
 }));
 

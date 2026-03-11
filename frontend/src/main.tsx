@@ -4,6 +4,7 @@ import "./index.css";
 import { RouterProvider } from "react-router-dom";
 import router from "./routes/Router.tsx";
 import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
 import theme from "./styles/theme.tsx";
 import { Provider } from "react-redux";
 import { store } from "./store/index.ts";
@@ -13,6 +14,7 @@ import "react-toastify/dist/ReactToastify.css";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider theme={theme}>
+      <CssBaseline />
       <Provider store={store}>
         <ToastContainer
           position="top-center"
@@ -23,7 +25,7 @@ createRoot(document.getElementById("root")!).render(
           draggable
           theme="colored"
         />
-          <RouterProvider router={router} />
+        <RouterProvider router={router} />
       </Provider>
     </ThemeProvider>
   </StrictMode>,

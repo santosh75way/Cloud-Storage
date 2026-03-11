@@ -28,19 +28,22 @@ import { getProfile, updateProfile, changePassword } from "@/services/api";
 import { type User } from "@/libs/types";
 import { useDispatch } from "react-redux";
 import { setAuth } from "@/store/authSlice";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 
 const profileSchema = z.object({
   fullName: z.string().min(2, "Name must be at least 2 characters"),
 });
 
-const passwordSchema = z.object({
-  oldPassword: z.string().min(6, "Password must be at least 6 characters"),
-  newPassword: z.string().min(6, "Password must be at least 6 characters"),
-  confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const passwordSchema = z
+  .object({
+    oldPassword: z.string().min(6, "Password must be at least 6 characters"),
+    newPassword: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 type PasswordFormData = z.infer<typeof passwordSchema>;
@@ -78,8 +81,8 @@ export default function Profile() {
       const data = await getProfile();
       setUser(data);
       resetProfile({ fullName: data.fullName });
-    } catch (error: any) {
-      toast.error(error.message || "Failed to fetch profile");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Failed to fetch profile"));
     } finally {
       setLoading(false);
     }
@@ -91,8 +94,8 @@ export default function Profile() {
       setUser(updatedUser);
       dispatch(setAuth({ user: updatedUser }));
       toast.success("Profile updated successfully");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update profile");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Failed to update profile"));
     }
   };
 
@@ -104,8 +107,8 @@ export default function Profile() {
       });
       toast.success("Password changed successfully");
       resetPassword();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to change password");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Failed to change password"));
     }
   };
 
@@ -120,31 +123,39 @@ export default function Profile() {
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
-        <CircularProgress />
+        <CircularProgress sx={{ color: "#6366f1" }} />
       </Box>
     );
   }
 
   return (
     <Box sx={styles.container}>
-      <Typography variant="h4" fontWeight={800} gutterBottom sx={styles.title}>
-        Account Settings
-      </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Update your personal information and security settings.
-      </Typography>
+      <Box sx={{ mb: 4, animation: "fadeInUp 0.4s ease-out" }}>
+        <Typography variant="h3" fontWeight={800} gutterBottom sx={styles.title}>
+          Account Settings
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Update your personal information and security settings.
+        </Typography>
+      </Box>
 
-      <Stack direction={{ xs: "column", md: "row" }} spacing={4} alignItems="flex-start">
-        <Paper elevation={0} sx={{ ...styles.profileCard, width: { xs: "100%", md: "350px" }, flexShrink: 0 }}>
+      <Stack direction={{ xs: "column", md: "row" }} spacing={3} alignItems="flex-start">
+        {/* Profile Card */}
+        <Paper
+          elevation={0}
+          sx={{
+            ...styles.profileCard,
+            width: { xs: "100%", md: "320px" },
+            flexShrink: 0,
+            animation: "fadeInUp 0.5s ease-out 0.1s both",
+          }}
+        >
           <Box sx={styles.avatarWrapper}>
-            <Avatar
-              src={user?.avatarUrl}
-              sx={styles.avatar}
-            >
+            <Avatar src={user?.avatarUrl} sx={styles.avatar}>
               {user?.fullName?.[0]}
             </Avatar>
-            <IconButton sx={styles.uploadBtn}>
-              <PhotoCameraIcon />
+            <IconButton sx={styles.uploadBtn} size="small">
+              <PhotoCameraIcon fontSize="small" />
             </IconButton>
           </Box>
           <Typography variant="h6" fontWeight={700} align="center" sx={{ mt: 2 }}>
@@ -156,25 +167,41 @@ export default function Profile() {
           <Divider sx={{ width: "100%", mb: 3 }} />
           <Stack spacing={2} sx={{ width: "100%" }}>
             <Box display="flex" alignItems="center" gap={1.5}>
-              <EmailIcon color="action" fontSize="small" />
+              <EmailIcon sx={{ color: "#94A3B8", fontSize: 18 }} />
               <Typography variant="body2">{user?.email}</Typography>
             </Box>
-            <Box display="flex" alignItems="center" justifyContent="space-between" gap={1.5}>
-              <Box display="flex" alignItems="center" gap={1.5}>
-                <PersonIcon color="action" fontSize="small" />
-                <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                  ID: {user?.id}
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+              gap={1.5}
+            >
+              <Box display="flex" alignItems="center" gap={1.5} sx={{ overflow: "hidden" }}>
+                <PersonIcon sx={{ color: "#94A3B8", fontSize: 18, flexShrink: 0 }} />
+                <Typography
+                  variant="body2"
+                  sx={{ fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis" }}
+                >
+                  {user?.id}
                 </Typography>
               </Box>
-              <IconButton size="small" onClick={handleCopyId} color={copiedId ? "success" : "default"}>
+              <IconButton
+                size="small"
+                onClick={handleCopyId}
+                sx={{ color: copiedId ? "success.main" : "#94A3B8", transition: "color 0.2s ease" }}
+              >
                 {copiedId ? <CheckIcon fontSize="small" /> : <ContentCopyIcon fontSize="small" />}
               </IconButton>
             </Box>
           </Stack>
         </Paper>
 
-        <Stack spacing={4} sx={{ flexGrow: 1, width: "100%" }}>
-          <Paper elevation={0} sx={styles.formCard}>
+        {/* Form Cards */}
+        <Stack spacing={3} sx={{ flexGrow: 1, width: "100%" }}>
+          <Paper
+            elevation={0}
+            sx={{ ...styles.formCard, animation: "fadeInUp 0.5s ease-out 0.2s both" }}
+          >
             <Typography variant="h6" fontWeight={700} gutterBottom>
               Personal Information
             </Typography>
@@ -209,11 +236,18 @@ export default function Profile() {
             </Box>
           </Paper>
 
-          <Paper elevation={0} sx={styles.formCard}>
+          <Paper
+            elevation={0}
+            sx={{ ...styles.formCard, animation: "fadeInUp 0.5s ease-out 0.3s both" }}
+          >
             <Typography variant="h6" fontWeight={700} gutterBottom>
               Security Settings
             </Typography>
-            <Box component="form" onSubmit={handlePasswordSubmit(onPasswordSubmit)} sx={{ mt: 3 }}>
+            <Box
+              component="form"
+              onSubmit={handlePasswordSubmit(onPasswordSubmit)}
+              sx={{ mt: 3 }}
+            >
               <Stack spacing={3}>
                 <TextField
                   fullWidth
@@ -269,44 +303,57 @@ const styles = {
   },
   title: {
     letterSpacing: "-0.02em",
-    color: "#1e293b",
+    background: "linear-gradient(135deg, #0F172A, #334155)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
   },
   profileCard: {
     p: 4,
-    borderRadius: 4,
-    border: "1px solid #e2e8f0",
+    borderRadius: 3,
+    border: "1px solid #E2E8F0",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
+    transition: "all 0.3s ease",
+    "&:hover": {
+      boxShadow: "0 8px 24px rgba(0, 0, 0, 0.06)",
+    },
   },
   avatarWrapper: {
     position: "relative",
   },
   avatar: {
-    width: 120,
-    height: 120,
-    fontSize: "3rem",
+    width: 100,
+    height: 100,
+    fontSize: "2.5rem",
     fontWeight: 700,
-    bgcolor: "#6366f1",
+    background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
   },
   uploadBtn: {
     position: "absolute",
     bottom: 0,
     right: 0,
     bgcolor: "white",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    "&:hover": { bgcolor: "#f8fafc" },
+    border: "2px solid #E2E8F0",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+    transition: "all 0.2s ease",
+    "&:hover": { bgcolor: "#F8FAFC", borderColor: "#CBD5E1" },
   },
   formCard: {
     p: 4,
-    borderRadius: 4,
-    border: "1px solid #e2e8f0",
+    borderRadius: 3,
+    border: "1px solid #E2E8F0",
+    transition: "all 0.3s ease",
+    "&:hover": {
+      boxShadow: "0 4px 16px rgba(0, 0, 0, 0.04)",
+    },
   },
   saveBtn: {
-    borderRadius: 2,
+    borderRadius: 2.5,
     textTransform: "none",
     fontWeight: 600,
-    px: 4,
+    px: 3,
     minWidth: 160,
+    transition: "all 0.2s ease",
   },
 };

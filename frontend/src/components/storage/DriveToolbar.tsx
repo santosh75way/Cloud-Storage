@@ -23,14 +23,15 @@ export function DriveToolbar({ parentId }: DriveToolbarProps) {
                 sx={{
                     bgcolor: "white",
                     py: 1.5,
-                    px: 2,
-                    borderRadius: 2,
-                    border: "1px solid #e2e8f0",
+                    px: 2.5,
+                    borderRadius: 2.5,
+                    border: "1px solid #E2E8F0",
+                    transition: "all 0.2s ease",
                 }}
             >
                 <CreateFolderSection parentId={parentId} />
 
-                <Box sx={{ display: { xs: "none", lg: "block" }, height: 24, width: "1px", bgcolor: "divider" }} />
+                <Box sx={{ display: { xs: "none", lg: "block" }, height: 24, width: "1px", bgcolor: "#E2E8F0" }} />
 
                 <UploadFileButton parentId={parentId} />
             </Stack>

@@ -1,4 +1,4 @@
-import { Stack, Typography, Box } from "@mui/material";
+import { Typography, Box } from "@mui/material";
 import type { ReactNode } from "react";
 
 type DriveContentHeaderProps = {
@@ -13,21 +13,34 @@ export function DriveContentHeader({
     actions,
 }: DriveContentHeaderProps) {
     return (
-        <Stack spacing={2} sx={{ pb: 3, borderBottom: "1px solid #f1f5f9", mb: 2 }}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 2 }}>
-                <Stack spacing={1}>
-                    <Typography variant="h4" fontWeight={700} sx={{ letterSpacing: "-0.5px", color: "#1e293b" }}>
-                        {title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" fontWeight={500}>
-                        Manage folders and files in your workspace
-                    </Typography>
-                </Stack>
+        <Box sx={{ pb: 2, borderBottom: "1px solid #F1F5F9", mb: 1 }}>
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                    gap: 1.5,
+                    mb: 1,
+                }}
+            >
+                <Typography
+                    variant="h5"
+                    fontWeight={800}
+                    sx={{
+                        letterSpacing: "-0.02em",
+                        background: "linear-gradient(135deg, #0F172A, #334155)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                    }}
+                >
+                    {title}
+                </Typography>
 
                 <Box>{actions}</Box>
             </Box>
 
-            <Box sx={{ mt: 1 }}>{breadcrumbs}</Box>
-        </Stack>
+            <Box>{breadcrumbs}</Box>
+        </Box>
     );
 }

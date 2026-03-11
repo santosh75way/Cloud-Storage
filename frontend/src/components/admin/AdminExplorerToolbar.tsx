@@ -13,7 +13,6 @@ import {
 import {
     CreateNewFolder as NewFolderIcon,
     CloudUpload as UploadIcon,
-    DriveFileMove as MoveIcon,
     DriveFileRenameOutline as RenameIcon,
     DeleteOutline as DeleteIcon,
     Share as ShareIcon,
@@ -38,6 +37,27 @@ type AdminExplorerToolbarProps = {
     onRename?: () => void;
     onDelete?: () => void;
     onShare?: () => void;
+};
+
+const disabledButtonSx = {
+    borderRadius: 2,
+    textTransform: "none",
+    fontWeight: 600,
+    fontSize: "0.8125rem",
+    py: 0.75,
+    px: 1.5,
+    color: "#64748B",
+    borderColor: "#E2E8F0",
+    transition: "all 0.2s ease",
+    "&.Mui-disabled": {
+        opacity: 0.45,
+        color: "#94A3B8",
+        borderColor: "#E2E8F0",
+    },
+    "&:hover": {
+        borderColor: "#CBD5E1",
+        bgcolor: "rgba(99, 102, 241, 0.04)",
+    },
 };
 
 export function AdminExplorerToolbar({
@@ -71,7 +91,7 @@ export function AdminExplorerToolbar({
             await createFolder({ name: parsed.data.name, parentId }).unwrap();
             setIsFolderDialogOpen(false);
             setFolderName("");
-        } catch (err: any) {
+        } catch (err: unknown) {
             setFolderError(getApiErrorMessage(err, "Failed to create folder."));
         }
     };
@@ -116,9 +136,9 @@ export function AdminExplorerToolbar({
                 cloudinaryPublicId: uploadData.public_id,
                 cloudinaryResourceType: uploadData.resource_type,
             }).unwrap();
-        } catch (error: any) {
+        } catch (error: unknown) {
             setIsUploading(false);
-            setUploadError(error.message || "Upload failed");
+            setUploadError(getApiErrorMessage(error, "Upload failed"));
         } finally {
             if (fileInputRef.current) fileInputRef.current.value = "";
         }
@@ -127,12 +147,26 @@ export function AdminExplorerToolbar({
     const isUploadLoading = isSigning || isUploading || isCreatingFile;
 
     return (
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 3 }}>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, mb: 2 }}>
             <Button
                 variant="contained"
-                startIcon={<NewFolderIcon />}
+                size="small"
+                startIcon={<NewFolderIcon fontSize="small" />}
                 onClick={() => setIsFolderDialogOpen(true)}
-                sx={{ borderRadius: 2, textTransform: "none", boxShadow: "none" }}
+                sx={{
+                    borderRadius: 2,
+                    textTransform: "none",
+                    boxShadow: "none",
+                    fontWeight: 600,
+                    fontSize: "0.8125rem",
+                    py: 0.75,
+                    px: 1.5,
+                    background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                    "&:hover": {
+                        background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
+                        boxShadow: "0 4px 14px rgba(99, 102, 241, 0.3)",
+                    },
+                }}
             >
                 New Folder
             </Button>
@@ -141,10 +175,11 @@ export function AdminExplorerToolbar({
             <Button
                 variant="outlined"
                 color="inherit"
-                startIcon={isUploadLoading ? <CircularProgress size={20} /> : <UploadIcon />}
+                size="small"
+                startIcon={isUploadLoading ? <CircularProgress size={16} sx={{ color: "#6366f1" }} /> : <UploadIcon fontSize="small" />}
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploadLoading}
-                sx={{ borderRadius: 2, textTransform: "none", color: "text.secondary", borderColor: "#e2e8f0" }}
+                sx={disabledButtonSx}
             >
                 {isUploadLoading ? "Uploading..." : "Upload"}
             </Button>
@@ -152,20 +187,11 @@ export function AdminExplorerToolbar({
             <Button
                 variant="outlined"
                 color="inherit"
-                startIcon={<MoveIcon />}
-                disabled={!selectedNodeId}
-                sx={{ borderRadius: 2, textTransform: "none", color: "text.secondary", borderColor: "#e2e8f0" }}
-            >
-                Move
-            </Button>
-
-            <Button
-                variant="outlined"
-                color="inherit"
-                startIcon={<RenameIcon />}
+                size="small"
+                startIcon={<RenameIcon fontSize="small" />}
                 onClick={onRename}
                 disabled={!selectedNodeId}
-                sx={{ borderRadius: 2, textTransform: "none", color: "text.secondary", borderColor: "#e2e8f0" }}
+                sx={disabledButtonSx}
             >
                 Rename
             </Button>
@@ -173,10 +199,11 @@ export function AdminExplorerToolbar({
             <Button
                 variant="outlined"
                 color="inherit"
-                startIcon={<DeleteIcon />}
+                size="small"
+                startIcon={<DeleteIcon fontSize="small" />}
                 onClick={onDelete}
                 disabled={!selectedNodeId}
-                sx={{ borderRadius: 2, textTransform: "none", color: "text.secondary", borderColor: "#e2e8f0" }}
+                sx={disabledButtonSx}
             >
                 Delete
             </Button>
@@ -184,10 +211,11 @@ export function AdminExplorerToolbar({
             <Button
                 variant="outlined"
                 color="inherit"
-                startIcon={<ShareIcon />}
+                size="small"
+                startIcon={<ShareIcon fontSize="small" />}
                 onClick={onShare}
                 disabled={!selectedNodeId}
-                sx={{ borderRadius: 2, textTransform: "none", color: "text.secondary", borderColor: "#e2e8f0" }}
+                sx={disabledButtonSx}
             >
                 Share
             </Button>
@@ -195,15 +223,16 @@ export function AdminExplorerToolbar({
             <Button
                 variant="outlined"
                 color="inherit"
-                startIcon={<SearchIcon />}
-                onClick={() => navigate('/search')}
-                sx={{ borderRadius: 2, textTransform: "none", color: "text.secondary", borderColor: "#e2e8f0" }}
+                size="small"
+                startIcon={<SearchIcon fontSize="small" />}
+                onClick={() => navigate("/admin/search")}
+                sx={disabledButtonSx}
             >
                 Search
             </Button>
 
             {uploadError && (
-                <Alert severity="error" sx={{ width: "100%", mt: 1 }}>{uploadError}</Alert>
+                <Alert severity="error" sx={{ width: "100%", mt: 0.5 }}>{uploadError}</Alert>
             )}
 
             {/* New Folder Dialog */}
@@ -229,7 +258,19 @@ export function AdminExplorerToolbar({
                 </DialogContent>
                 <DialogActions sx={{ px: 3, pb: 2 }}>
                     <Button onClick={() => setIsFolderDialogOpen(false)} color="inherit" sx={{ textTransform: "none" }}>Cancel</Button>
-                    <Button onClick={handleCreateFolder} variant="contained" disabled={isCreatingFolder} sx={{ textTransform: "none", borderRadius: 2 }}>
+                    <Button
+                        onClick={handleCreateFolder}
+                        variant="contained"
+                        disabled={isCreatingFolder}
+                        sx={{
+                            textTransform: "none",
+                            borderRadius: 2,
+                            background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                            "&:hover": {
+                                background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
+                            },
+                        }}
+                    >
                         {isCreatingFolder ? "Creating..." : "Create"}
                     </Button>
                 </DialogActions>
