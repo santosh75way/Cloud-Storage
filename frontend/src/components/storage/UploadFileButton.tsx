@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useRef } from "react";
 import { UploadFile } from "@mui/icons-material";
 import {
     Alert,
@@ -6,14 +6,7 @@ import {
     CircularProgress,
     Box,
 } from "@mui/material";
-import {
-    useCreateFileNodeMutation,
-    useGenerateUploadSignatureMutation,
-} from "../../services/storageApi";
-import { getApiErrorMessage } from "../../utils/getApiErrorMessage";
-import { getCloudinaryResourceType } from "../../utils/storage/getCloudinaryResourceType";
-import { getFileExtension } from "../../utils/storage/getFileExtension";
-import { uploadFileToCloudinary } from "../../utils/storage/uploadFileToCloudinary";
+import { useCloudinaryUpload } from "../../hooks/useCloudinaryUpload";
 
 type UploadFileButtonProps = {
     parentId: string | null;
@@ -21,27 +14,18 @@ type UploadFileButtonProps = {
 
 export function UploadFileButton({ parentId }: UploadFileButtonProps) {
     const fileInputRef = useRef<HTMLInputElement | null>(null);
-    const [localError, setLocalError] = useState<string | null>(null);
-    const [isUploading, setIsUploading] = useState(false);
-
-    const [generateUploadSignature, generateUploadSignatureState] =
-        useGenerateUploadSignatureMutation();
-
-    const [createFileNode, createFileNodeState] = useCreateFileNodeMutation();
-
-    const apiErrorMessage = useMemo(() => {
-        if (localError) return localError;
-        if (generateUploadSignatureState.error) return getApiErrorMessage(generateUploadSignatureState.error, "Failed to prepare upload.");
-        if (createFileNodeState.error) return getApiErrorMessage(createFileNodeState.error, "Failed to save file metadata.");
-        return null;
-    }, [localError, generateUploadSignatureState.error, createFileNodeState.error]);
 
     const resetFileInput = () => {
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
+    const { uploadFile, isLoading, error, resetError } = useCloudinaryUpload({
+        parentId,
+        onSuccess: resetFileInput
+    });
+
     const handleSelectClick = () => {
-        setLocalError(null);
+        resetError();
         fileInputRef.current?.click();
     };
 
@@ -49,53 +33,16 @@ export function UploadFileButton({ parentId }: UploadFileButtonProps) {
         const file = event.target.files?.[0];
         if (!file) return;
 
-        setLocalError(null);
+        const success = await uploadFile(file);
 
-        if (file.size > 10 * 1024 * 1024) { // 10MB
-            setLocalError("File exceeds the maximum upload size of 10MB.");
+        if (!success) {
             resetFileInput();
-            return;
-        }
-
-        setIsUploading(true);
-
-        try {
-            const signatureResponse = await generateUploadSignature({
-                fileName: file.name,
-                folderId: parentId,
-                mimeType: file.type || "application/octet-stream",
-            }).unwrap();
-
-            const signatureData = signatureResponse.data;
-
-            const cloudinaryResponse = await uploadFileToCloudinary({ file, signatureData });
-
-            await createFileNode({
-                name: file.name,
-                parentId,
-                mimeType: file.type || "application/octet-stream",
-                size: file.size,
-                extension: getFileExtension(file.name),
-                cloudinaryPublicId: cloudinaryResponse.public_id,
-                cloudinaryResourceType: getCloudinaryResourceType(file),
-            }).unwrap();
-
-            resetFileInput();
-        } catch (error) {
-            const rawError = getApiErrorMessage(error, "File upload failed.");
-            const friendlyError = rawError.includes("Invalid Signature")
-                ? "Upload rejected by the server due to a security signature mismatch. Please try again."
-                : rawError;
-
-            setLocalError(friendlyError);
-        } finally {
-            setIsUploading(false);
         }
     };
 
     return (
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            {apiErrorMessage && <Alert severity="error" sx={{ py: 0, px: 1, '& .MuiAlert-message': { py: 0.5 } }}>{apiErrorMessage}</Alert>}
+            {error && <Alert severity="error" sx={{ py: 0, px: 1, '& .MuiAlert-message': { py: 0.5 } }}>{error}</Alert>}
 
             <input
                 ref={fileInputRef}
@@ -107,9 +54,9 @@ export function UploadFileButton({ parentId }: UploadFileButtonProps) {
             <Button
                 variant="contained"
                 color="secondary"
-                startIcon={isUploading ? <CircularProgress size={20} color="inherit" /> : <UploadFile />}
+                startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : <UploadFile />}
                 onClick={handleSelectClick}
-                disabled={isUploading}
+                disabled={isLoading}
                 sx={{
                     borderRadius: 2,
                     textTransform: "none",
@@ -118,7 +65,7 @@ export function UploadFileButton({ parentId }: UploadFileButtonProps) {
                     "&:hover": { boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }
                 }}
             >
-                {isUploading ? "Uploading..." : "Upload File"}
+                {isLoading ? "Uploading..." : "Upload File"}
             </Button>
         </Box>
     );

@@ -45,21 +45,21 @@ const axiosBaseQuery =
 
 export const publicLinksApi = createApi({
     reducerPath: "publicLinksApi",
-    baseQuery: axiosBaseQuery({ baseUrl: "/api/v1" }),
+    baseQuery: axiosBaseQuery({ baseUrl: "/api/" }),
     tagTypes: ["PublicLink", "PublicNode"],
     endpoints: (builder) => ({
         // --- Admin Endpoints ---
         createPublicLink: builder.mutation<ApiSuccessResponse<PublicShareLink>, CreatePublicLinkPayload>({
             query: (payload) => ({
-                url: "/public-links",
+                url: "public-links",
                 method: "POST",
-                body: payload,
+                body: { body: payload },
             }),
             invalidatesTags: (_result, _error, arg) => [{ type: "PublicLink", id: arg.nodeId }],
         }),
 
         getPublicLinksForNode: builder.query<ApiSuccessResponse<PublicShareLink[]>, string>({
-            query: (nodeId) => ({ url: `/public-links/node/${nodeId}` }),
+            query: (nodeId) => ({ url: `public-links/node/${nodeId}` }),
             providesTags: (result, _error, arg) =>
                 result?.data
                     ? [
@@ -71,28 +71,36 @@ export const publicLinksApi = createApi({
 
         revokePublicLink: builder.mutation<ApiSuccessResponse<PublicShareLink>, string>({
             query: (id) => ({
-                url: `/public-links/${id}/revoke`,
+                url: `public-links/${id}/revoke`,
                 method: "PATCH",
             }),
             invalidatesTags: (result) =>
                 result?.data ? [{ type: "PublicLink", id: result.data.nodeId }] : ["PublicLink"],
         }),
 
+        deletePublicLink: builder.mutation<ApiSuccessResponse<void>, { id: string, nodeId: string }>({
+            query: ({ id }) => ({
+                url: `public-links/${id}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: (_result, _error, arg) => [{ type: "PublicLink", id: arg.nodeId }],
+        }),
+
         // --- Anonymous Public Endpoints ---
         getPublicNodeByToken: builder.query<ApiSuccessResponse<PublicNodeResponse>, string>({
-            query: (token) => ({ url: `/public/${token}` }),
+            query: (token) => ({ url: `public/${token}` }),
             providesTags: (_result, _error, arg) => [{ type: "PublicNode", id: arg }],
         }),
 
         getPublicChildrenByToken: builder.query<
             ApiSuccessResponse<PublicChildrenResponse>,
-            { token: string; page?: number; limit?: number }
+            { token: string; nodeId?: string; page?: number; limit?: number }
         >({
-            query: ({ token, page = 1, limit = 50 }) => ({
-                url: `/public/${token}/children`,
-                params: { page, limit },
+            query: ({ token, nodeId, page = 1, limit = 50 }) => ({
+                url: `public/${token}/children`,
+                params: nodeId ? { nodeId, page, limit } : { page, limit },
             }),
-            providesTags: (_result, _error, arg) => [{ type: "PublicNode", id: `children_${arg.token}` }],
+            providesTags: (_result, _error, arg) => [{ type: "PublicNode", id: `children_${arg.token}_${arg.nodeId || "root"}` }],
         }),
 
         getPublicBreadcrumbsByToken: builder.query<
@@ -100,20 +108,20 @@ export const publicLinksApi = createApi({
             { token: string; nodeId?: string }
         >({
             query: ({ token, nodeId }) => ({
-                url: `/public/${token}/breadcrumbs`,
+                url: `public/${token}/breadcrumbs`,
                 params: nodeId ? { nodeId } : undefined,
             }),
         }),
 
         getPublicFileAccessUrlByToken: builder.query<ApiSuccessResponse<PublicFileAccessUrlResponse>, string>({
-            query: (token) => ({ url: `/public/${token}/file-access-url` }),
+            query: (token) => ({ url: `public/${token}/file-access-url` }),
         }),
 
         getPublicDescendantFileAccessUrl: builder.query<
             ApiSuccessResponse<PublicFileAccessUrlResponse>,
             { token: string; nodeId: string }
         >({
-            query: ({ token, nodeId }) => ({ url: `/public/${token}/files/${nodeId}/access-url` }),
+            query: ({ token, nodeId }) => ({ url: `public/${token}/files/${nodeId}/access-url` }),
         }),
     }),
 });
@@ -122,6 +130,7 @@ export const {
     useCreatePublicLinkMutation,
     useGetPublicLinksForNodeQuery,
     useRevokePublicLinkMutation,
+    useDeletePublicLinkMutation,
     useGetPublicNodeByTokenQuery,
     useGetPublicChildrenByTokenQuery,
     useGetPublicBreadcrumbsByTokenQuery,

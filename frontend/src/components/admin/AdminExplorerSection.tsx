@@ -13,6 +13,7 @@ import { AdminExplorerTable } from "./AdminExplorerTable";
 import { getApiErrorMessage } from "../../utils/getApiErrorMessage";
 import { RenameNodeDialog } from "../storage/RenameNodeButton";
 import { ShareNodeDialog } from "../sharing/ShareNodeDialog";
+import { CreatePublicLinkDialog } from "../public-links/CreatePublicLinkDialog";
 import type { StorageNode } from "../../types/storage";
 
 type AdminExplorerSectionProps = {
@@ -25,6 +26,7 @@ export function AdminExplorerSection({ folderId }: AdminExplorerSectionProps) {
     const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
     const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
     const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+    const [isPublicLinkDialogOpen, setIsPublicLinkDialogOpen] = useState(false);
 
     // Data fetching
     const isRoot = !folderId;
@@ -105,6 +107,7 @@ export function AdminExplorerSection({ folderId }: AdminExplorerSectionProps) {
                     onDelete={handleDelete}
                     onRename={() => setIsRenameDialogOpen(true)}
                     onShare={() => setIsShareDialogOpen(true)}
+                    onPublicLink={() => setIsPublicLinkDialogOpen(true)}
                 />
             </Box>
 
@@ -154,6 +157,15 @@ export function AdminExplorerSection({ folderId }: AdminExplorerSectionProps) {
                 <ShareNodeDialog
                     open={isShareDialogOpen}
                     onClose={() => setIsShareDialogOpen(false)}
+                    node={items.find((n: StorageNode) => n.id === selectedNodeId)!}
+                />
+            )}
+
+            {/* Public Link Dialog */}
+            {selectedNodeId && items.find((n: StorageNode) => n.id === selectedNodeId) && (
+                <CreatePublicLinkDialog
+                    open={isPublicLinkDialogOpen}
+                    onClose={() => setIsPublicLinkDialogOpen(false)}
                     node={items.find((n: StorageNode) => n.id === selectedNodeId)!}
                 />
             )}

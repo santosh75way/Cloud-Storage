@@ -16,14 +16,14 @@ import {
     DriveFileRenameOutline as RenameIcon,
     DeleteOutline as DeleteIcon,
     Share as ShareIcon,
+    Link as LinkIcon,
     Search as SearchIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import {
     useCreateFolderMutation,
-    useGenerateUploadSignatureMutation,
-    useCreateFileNodeMutation,
 } from "../../services/storageApi";
+import { useCloudinaryUpload } from "../../hooks/useCloudinaryUpload";
 import { getApiErrorMessage } from "../../utils/getApiErrorMessage";
 import { z } from "zod";
 
@@ -37,6 +37,7 @@ type AdminExplorerToolbarProps = {
     onRename?: () => void;
     onDelete?: () => void;
     onShare?: () => void;
+    onPublicLink?: () => void;
 };
 
 const disabledButtonSx = {
@@ -66,6 +67,7 @@ export function AdminExplorerToolbar({
     onRename,
     onDelete,
     onShare,
+    onPublicLink,
 }: AdminExplorerToolbarProps) {
     const navigate = useNavigate();
     const [isFolderDialogOpen, setIsFolderDialogOpen] = useState(false);
@@ -73,11 +75,7 @@ export function AdminExplorerToolbar({
     const [folderError, setFolderError] = useState<string | null>(null);
 
     const [createFolder, { isLoading: isCreatingFolder, error: createFolderError }] = useCreateFolderMutation();
-    const [generateSignature, { isLoading: isSigning }] = useGenerateUploadSignatureMutation();
-    const [createFileNode, { isLoading: isCreatingFile }] = useCreateFileNodeMutation();
-
-    const [isUploading, setIsUploading] = useState(false);
-    const [uploadError, setUploadError] = useState<string | null>(null);
+    const { uploadFile, isLoading: isUploadLoading, error: uploadError, resetError: resetUploadError } = useCloudinaryUpload({ parentId });
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleCreateFolder = async () => {
@@ -99,65 +97,13 @@ export function AdminExplorerToolbar({
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
-        setUploadError(null);
 
-        if (file.size > 10 * 1024 * 1024) { // 10MB
-            setUploadError("File exceeds the maximum upload size of 10MB.");
-            if (fileInputRef.current) fileInputRef.current.value = "";
-            return;
-        }
-        try {
-            const signRes = await generateSignature({
-                fileName: file.name,
-                folderId: parentId,
-                mimeType: file.type || "application/octet-stream",
-            }).unwrap();
+        const success = await uploadFile(file);
 
-            const { signature, timestamp, apiKey, cloudName, folder, uploadPreset } = signRes.data;
-
-            setIsUploading(true);
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("api_key", apiKey);
-            formData.append("timestamp", String(timestamp));
-            formData.append("signature", signature);
-            formData.append("folder", folder);
-            formData.append("upload_preset", uploadPreset);
-
-            const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
-            const uploadResponse = await fetch(cloudinaryUrl, { method: "POST", body: formData });
-            const uploadData = await uploadResponse.json();
-
-            if (!uploadResponse.ok) {
-                throw new Error(uploadData.error?.message || "Upload failed");
-            }
-            setIsUploading(false);
-
-            const extension = file.name.includes(".") ? file.name.split(".").pop() || null : null;
-            await createFileNode({
-                name: file.name,
-                parentId,
-                mimeType: file.type || "application/octet-stream",
-                size: file.size,
-                extension,
-                cloudinaryPublicId: uploadData.public_id,
-                cloudinaryResourceType: uploadData.resource_type,
-            }).unwrap();
-        } catch (error: unknown) {
-            setIsUploading(false);
-
-            const rawError = getApiErrorMessage(error, "Upload failed");
-            const friendlyError = rawError.includes("Invalid Signature")
-                ? "Upload rejected due to a security signature mismatch. Please try again."
-                : rawError;
-
-            setUploadError(friendlyError);
-        } finally {
-            if (fileInputRef.current) fileInputRef.current.value = "";
+        if (!success && fileInputRef.current) {
+            fileInputRef.current.value = "";
         }
     };
-
-    const isUploadLoading = isSigning || isUploading || isCreatingFile;
 
     return (
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, mb: 2 }}>
@@ -190,7 +136,10 @@ export function AdminExplorerToolbar({
                 color="inherit"
                 size="small"
                 startIcon={isUploadLoading ? <CircularProgress size={16} sx={{ color: "#6366f1" }} /> : <UploadIcon fontSize="small" />}
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => {
+                    resetUploadError();
+                    fileInputRef.current?.click();
+                }}
                 disabled={isUploadLoading}
                 sx={disabledButtonSx}
             >
@@ -230,7 +179,19 @@ export function AdminExplorerToolbar({
                 disabled={!selectedNodeId}
                 sx={disabledButtonSx}
             >
-                Share
+                Internal Share
+            </Button>
+
+            <Button
+                variant="outlined"
+                color="inherit"
+                size="small"
+                startIcon={<LinkIcon fontSize="small" />}
+                onClick={onPublicLink}
+                disabled={!selectedNodeId}
+                sx={disabledButtonSx}
+            >
+                Public Link
             </Button>
 
             <Button
