@@ -2,8 +2,15 @@ import { prisma } from "../../common/prisma";
 import type { Prisma, PublicShareLink, Node } from "@prisma/client";
 
 export class PublicLinksRepository {
-    async createPublicLink(data: Prisma.PublicShareLinkUncheckedCreateInput): Promise<PublicShareLink> {
-        return prisma.publicShareLink.create({ data });
+    async createPublicLink(data: { nodeId: string, token: string, createdByUserId: string, expiresAt: Date | null }): Promise<PublicShareLink> {
+        return prisma.publicShareLink.create({
+            data: {
+                token: data.token,
+                expiresAt: data.expiresAt,
+                node: { connect: { id: data.nodeId } },
+                createdByUser: { connect: { id: data.createdByUserId } }
+            }
+        });
     }
 
     async findPublicLinkById(id: string): Promise<PublicShareLink | null> {
@@ -25,6 +32,12 @@ export class PublicLinksRepository {
         return prisma.publicShareLink.update({
             where: { id },
             data: { isActive: false },
+        });
+    }
+
+    async deletePublicLink(id: string): Promise<PublicShareLink> {
+        return prisma.publicShareLink.delete({
+            where: { id },
         });
     }
 

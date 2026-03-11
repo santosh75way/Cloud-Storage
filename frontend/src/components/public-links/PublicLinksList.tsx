@@ -8,10 +8,11 @@ import {
     IconButton,
     Tooltip,
 } from "@mui/material";
-import { BlockOutlined } from "@mui/icons-material";
+import { DeleteOutlined, BlockOutlined } from "@mui/icons-material";
 import {
     useGetPublicLinksForNodeQuery,
     useRevokePublicLinkMutation,
+    useDeletePublicLinkMutation,
 } from "../../services/publicLinksApi";
 import { PublicLinkStatusChip } from "./PublicLinkStatusChip";
 import { CopyPublicLinkButton } from "./CopyPublicLinkButton";
@@ -24,6 +25,7 @@ type Props = {
 export function PublicLinksList({ nodeId }: Props) {
     const { data: response, isLoading, isError } = useGetPublicLinksForNodeQuery(nodeId);
     const [revokeLink, { isLoading: isRevoking }] = useRevokePublicLinkMutation();
+    const [deleteLink, { isLoading: isDeleting }] = useDeletePublicLinkMutation();
 
     if (isLoading) {
         return (
@@ -72,11 +74,28 @@ export function PublicLinksList({ nodeId }: Props) {
                                             color="error"
                                             disabled={isRevoked || isExpired || isRevoking}
                                             onClick={() => revokeLink(link.id)}
+                                            sx={{ display: isRevoked ? "none" : "inline-flex" }}
                                         >
                                             <BlockOutlined fontSize="small" />
                                         </IconButton>
                                     </span>
                                 </Tooltip>
+
+                                {isRevoked && (
+                                    <Tooltip title="Delete Permanently">
+                                        <span>
+                                            <IconButton
+                                                edge="end"
+                                                size="small"
+                                                color="error"
+                                                disabled={isDeleting}
+                                                onClick={() => deleteLink({ id: link.id, nodeId: link.nodeId })}
+                                            >
+                                                <DeleteOutlined fontSize="small" />
+                                            </IconButton>
+                                        </span>
+                                    </Tooltip>
+                                )}
                             </Box>
                         }
                     >

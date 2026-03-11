@@ -8,6 +8,7 @@ const router = Router();
 router.post("/public-links", authenticate, publicLinksController.createPublicLink.bind(publicLinksController));
 router.get("/public-links/node/:nodeId", authenticate, publicLinksController.listPublicLinksForNode.bind(publicLinksController));
 router.patch("/public-links/:id/revoke", authenticate, publicLinksController.revokePublicLink.bind(publicLinksController));
+router.delete("/public-links/:id", authenticate, publicLinksController.deletePublicLink.bind(publicLinksController));
 
 // --- Anonymous Public Endpoints (No Auth Required) ---
 router.get("/public/:token", publicLinksController.publicGetNode.bind(publicLinksController));
